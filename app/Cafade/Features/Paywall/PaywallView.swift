@@ -52,7 +52,7 @@ struct PaywallView: View {
                 .font(.caption.weight(.semibold))
                 .tracking(1.9)
                 .foregroundStyle(CafadePalette.saffron)
-            Text("Go beyond today.")
+            Text("Let your pattern grow.")
                 .font(.system(size: 38, weight: .medium, design: .serif))
                 .foregroundStyle(CafadePalette.paper)
             Text("Cafade Pro gives your quiet daily log a longer memory.")

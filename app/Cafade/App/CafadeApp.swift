@@ -12,7 +12,7 @@ struct CafadeApp: App {
             AppRootView()
                 .environment(services)
                 .environmentObject(entitlements)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(.light)
         }
         .modelContainer(for: [IntakeEvent.self, UserSettings.self])
     }

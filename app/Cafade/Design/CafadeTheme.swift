@@ -1,37 +1,45 @@
 import SwiftUI
 
 enum CafadePalette {
-    static let midnight = Color(red: 0.055, green: 0.075, blue: 0.12)
-    static let deepNavy = Color(red: 0.085, green: 0.12, blue: 0.18)
-    static let ink = Color(red: 0.12, green: 0.14, blue: 0.18)
-    static let paper = Color(red: 0.96, green: 0.95, blue: 0.91)
-    static let mist = Color(red: 0.78, green: 0.82, blue: 0.84)
-    static let saffron = Color(red: 0.98, green: 0.69, blue: 0.24)
-    static let mint = Color(red: 0.42, green: 0.82, blue: 0.70)
-    static let sky = Color(red: 0.40, green: 0.68, blue: 0.96)
-    static let coral = Color(red: 0.96, green: 0.43, blue: 0.35)
-    static let lavender = Color(red: 0.70, green: 0.60, blue: 0.95)
-    static let line = Color.white.opacity(0.12)
+    // The visual language is intentionally editorial: warm paper, near-black ink,
+    // and a small set of translucent fruit-toned accents.
+    static let background = Color(red: 0.972, green: 0.962, blue: 0.938)
+    static let surface = Color(red: 0.995, green: 0.988, blue: 0.972)
+    static let surfaceMuted = Color(red: 0.944, green: 0.934, blue: 0.912)
+    static let ink = Color(red: 0.095, green: 0.091, blue: 0.085)
+    static let paper = ink
+    static let mist = Color(red: 0.40, green: 0.38, blue: 0.35)
+    static let saffron = Color(red: 0.91, green: 0.43, blue: 0.12)
+    static let mint = Color(red: 0.22, green: 0.47, blue: 0.30)
+    static let sky = Color(red: 0.28, green: 0.40, blue: 0.70)
+    static let coral = Color(red: 0.83, green: 0.26, blue: 0.12)
+    static let lavender = Color(red: 0.46, green: 0.39, blue: 0.67)
+    static let line = ink.opacity(0.12)
+
+    // Compatibility names used by the first implementation.
+    static let midnight = background
+    static let deepNavy = surfaceMuted
 }
 
 struct CafadeBackground: View {
     var body: some View {
         ZStack {
+            CafadePalette.background
             LinearGradient(
-                colors: [CafadePalette.midnight, CafadePalette.deepNavy],
+                colors: [CafadePalette.surface.opacity(0.52), .clear],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             Circle()
-                .fill(CafadePalette.saffron.opacity(0.12))
-                .frame(width: 280, height: 280)
-                .blur(radius: 70)
-                .offset(x: 130, y: -260)
-            Circle()
-                .fill(CafadePalette.sky.opacity(0.09))
+                .fill(CafadePalette.saffron.opacity(0.10))
                 .frame(width: 330, height: 330)
-                .blur(radius: 90)
-                .offset(x: -190, y: 300)
+                .blur(radius: 78)
+                .offset(x: 154, y: -288)
+            Circle()
+                .fill(CafadePalette.lavender.opacity(0.11))
+                .frame(width: 380, height: 380)
+                .blur(radius: 96)
+                .offset(x: -178, y: 320)
         }
         .ignoresSafeArea()
     }
@@ -48,12 +56,13 @@ struct CafadeGlassCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(20)
-            .background(CafadePalette.deepNavy.opacity(0.38), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .padding(18)
+            .background(CafadePalette.surface.opacity(0.84), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .stroke(CafadePalette.line, lineWidth: 1)
             }
+            .shadow(color: CafadePalette.ink.opacity(0.055), radius: 16, y: 8)
             .modifier(CafadeGlassModifier(tint: tint))
     }
 }
@@ -64,13 +73,12 @@ private struct CafadeGlassModifier: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
-            if let tint {
-                content.glassEffect(.regular.tint(tint), in: .rect(cornerRadius: 26))
-            } else {
-                content.glassEffect(.regular, in: .rect(cornerRadius: 26))
-            }
+            content.glassEffect(
+                .regular.tint((tint ?? CafadePalette.surface).opacity(0.34)),
+                in: .rect(cornerRadius: 22)
+            )
         } else {
-            content
+            content.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         }
     }
 }
@@ -87,8 +95,8 @@ struct CafadeSectionLabel: View {
                 .tracking(1.8)
                 .foregroundStyle(CafadePalette.saffron)
             Text(title)
-                .font(.system(.title3, design: .serif).weight(.medium))
-                .foregroundStyle(CafadePalette.paper)
+                .font(.system(size: 24, weight: .regular, design: .serif))
+                .foregroundStyle(CafadePalette.ink)
             if let detail {
                 Text(detail)
                     .font(.subheadline)
@@ -108,7 +116,40 @@ struct CafadePill: View {
             .foregroundStyle(color)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(color.opacity(0.13), in: Capsule())
+            .background(color.opacity(0.11), in: Capsule())
+            .overlay(Capsule().stroke(color.opacity(0.16), lineWidth: 1))
+    }
+}
+
+struct CafadeCaffeineOrb: View {
+    let estimate: CaffeineEstimate
+
+    var body: some View {
+        ZStack {
+            Ellipse()
+                .fill(
+                    LinearGradient(
+                        colors: [CafadePalette.saffron.opacity(0.82), CafadePalette.coral.opacity(0.68), CafadePalette.lavender.opacity(0.44)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay {
+                    Ellipse()
+                        .stroke(CafadePalette.surface.opacity(0.7), lineWidth: 1)
+                        .padding(5)
+                }
+                .shadow(color: CafadePalette.saffron.opacity(0.28), radius: 18, y: 8)
+            Ellipse()
+                .stroke(CafadePalette.surface.opacity(0.55), lineWidth: 1)
+                .padding(16)
+            Circle()
+                .fill(CafadePalette.surface.opacity(0.82))
+                .frame(width: 9, height: 9)
+        }
+        .rotationEffect(.degrees(-8))
+        .opacity(estimate.typicalMg > 0 ? 0.72 : 0.12)
+        .accessibilityHidden(true)
     }
 }
 
@@ -116,11 +157,12 @@ struct CafadePrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline.weight(.semibold))
-            .foregroundStyle(CafadePalette.ink)
+            .foregroundStyle(CafadePalette.surface)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .background(CafadePalette.saffron, in: Capsule())
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .background(CafadePalette.ink, in: Capsule())
+            .shadow(color: CafadePalette.ink.opacity(0.16), radius: 10, y: 5)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.easeOut(duration: 0.18), value: configuration.isPressed)
     }
 }
@@ -129,12 +171,12 @@ struct CafadeSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline.weight(.medium))
-            .foregroundStyle(CafadePalette.paper)
+            .foregroundStyle(CafadePalette.ink)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(CafadePalette.paper.opacity(0.08), in: Capsule())
+            .background(CafadePalette.surface.opacity(0.62), in: Capsule())
             .overlay(Capsule().stroke(CafadePalette.line, lineWidth: 1))
-            .opacity(configuration.isPressed ? 0.75 : 1)
+            .opacity(configuration.isPressed ? 0.72 : 1)
     }
 }
 
@@ -145,11 +187,11 @@ struct CaffeineValueLabel: View {
     var body: some View {
         HStack(alignment: .lastTextBaseline, spacing: 7) {
             Text(estimate.shortDisplayText)
-                .font(.system(size: size, weight: .medium, design: .rounded))
+                .font(.system(size: size, weight: .regular, design: .serif))
                 .monospacedDigit()
-                .foregroundStyle(CafadePalette.paper)
+                .foregroundStyle(CafadePalette.ink)
             Text("mg")
-                .font(.system(size: size * 0.34, weight: .semibold, design: .rounded))
+                .font(.system(size: size * 0.34, weight: .medium, design: .serif))
                 .foregroundStyle(CafadePalette.saffron)
         }
         .accessibilityElement(children: .ignore)
@@ -207,9 +249,9 @@ struct CaffeineCurveView: View {
                 context.fill(
                     area,
                     with: .linearGradient(
-                        Gradient(colors: [CafadePalette.saffron.opacity(0.30), CafadePalette.saffron.opacity(0.01)]),
+                        Gradient(colors: [CafadePalette.saffron.opacity(0.36), CafadePalette.lavender.opacity(0.16), .clear]),
                         startPoint: CGPoint(x: 0, y: 0),
-                        endPoint: CGPoint(x: 0, y: size.height)
+                        endPoint: CGPoint(x: size.width, y: size.height)
                     )
                 )
                 context.stroke(
@@ -219,7 +261,7 @@ struct CaffeineCurveView: View {
                         startPoint: .zero,
                         endPoint: CGPoint(x: size.width, y: 0)
                     ),
-                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                    style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round)
                 )
 
                 let nowIndex = points.enumerated().min {
@@ -231,15 +273,15 @@ struct CaffeineCurveView: View {
                         path.move(to: CGPoint(x: nowPoint.x, y: 0))
                         path.addLine(to: CGPoint(x: nowPoint.x, y: size.height))
                     },
-                    with: .color(CafadePalette.paper.opacity(0.24)),
+                    with: .color(CafadePalette.ink.opacity(0.24)),
                     style: StrokeStyle(lineWidth: 1, dash: [4, 5])
                 )
                 context.fill(
-                    Path(ellipseIn: CGRect(x: nowPoint.x - 5, y: nowPoint.y - 5, width: 10, height: 10)),
-                    with: .color(CafadePalette.paper)
+                    Path(ellipseIn: CGRect(x: nowPoint.x - 6, y: nowPoint.y - 6, width: 12, height: 12)),
+                    with: .color(CafadePalette.surface)
                 )
                 context.fill(
-                    Path(ellipseIn: CGRect(x: nowPoint.x - 3, y: nowPoint.y - 3, width: 6, height: 6)),
+                    Path(ellipseIn: CGRect(x: nowPoint.x - 3.5, y: nowPoint.y - 3.5, width: 7, height: 7)),
                     with: .color(CafadePalette.saffron)
                 )
             }
@@ -268,7 +310,7 @@ struct CaffeineCurveView: View {
                 path.move(to: CGPoint(x: 0, y: size.height * 0.72))
                 path.addLine(to: CGPoint(x: size.width, y: size.height * 0.72))
             },
-            with: .color(CafadePalette.paper.opacity(0.12)),
+            with: .color(CafadePalette.line),
             style: StrokeStyle(lineWidth: 1, dash: [3, 5])
         )
     }
@@ -286,7 +328,7 @@ struct CafadeEmptyState: View {
                 .foregroundStyle(CafadePalette.saffron)
             Text(title)
                 .font(.headline)
-                .foregroundStyle(CafadePalette.paper)
+                .foregroundStyle(CafadePalette.ink)
             Text(detail)
                 .font(.subheadline)
                 .foregroundStyle(CafadePalette.mist)

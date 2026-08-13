@@ -81,7 +81,7 @@ struct HistoryView: View {
                 .font(.caption.weight(.semibold))
                 .tracking(1.8)
                 .foregroundStyle(CafadePalette.saffron)
-            Text("History")
+            Text("YOUR PATTERNS")
                 .font(.system(size: 38, weight: .medium, design: .serif))
                 .foregroundStyle(CafadePalette.paper)
             Text("A little context is more useful than a perfect score.")

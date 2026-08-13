@@ -36,6 +36,18 @@ struct TodayView: View {
                 .scrollIndicators(.hidden)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .bottom, spacing: 8) {
+                Button {
+                    isLogSheetPresented = true
+                } label: {
+                    Text("LOG CAFFEINE")
+                }
+                .buttonStyle(CafadePrimaryButtonStyle())
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .background(CafadePalette.background.opacity(0.94))
+                .accessibilityIdentifier("today.logCaffeine")
+            }
             .sheet(isPresented: $isLogSheetPresented) {
                 LogCaffeineSheet()
                     .environment(services)
@@ -77,7 +89,7 @@ struct TodayView: View {
                     .foregroundStyle(CafadePalette.saffron)
                     .textCase(.uppercase)
                     .tracking(1.2)
-                Text("Today")
+                Text("TODAY")
                     .font(.system(size: 38, weight: .medium, design: .serif))
                     .foregroundStyle(CafadePalette.paper)
             }
@@ -99,24 +111,29 @@ struct TodayView: View {
     private var estimateCard: some View {
         let estimate = currentEstimate
         return CafadeGlassCard(tint: CafadePalette.saffron.opacity(0.08)) {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    Text("Estimated caffeine remaining")
-                        .font(.subheadline.weight(.medium))
+            ZStack(alignment: .bottomTrailing) {
+                CafadeCaffeineOrb(estimate: estimate)
+                    .frame(width: 164, height: 88)
+                    .offset(x: 22, y: 14)
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        Text("Estimated caffeine remaining")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(CafadePalette.mist)
+                        Spacer()
+                        CafadePill(title: "ESTIMATE", color: CafadePalette.saffron)
+                    }
+                    CaffeineValueLabel(estimate: estimate, size: 58)
+                    Text(estimateSubtitle(for: estimate))
+                        .font(.subheadline)
                         .foregroundStyle(CafadePalette.mist)
-                    Spacer()
-                    CafadePill(title: "ESTIMATE", color: CafadePalette.saffron)
-                }
-                CaffeineValueLabel(estimate: estimate, size: 58)
-                Text(estimateSubtitle(for: estimate))
-                    .font(.subheadline)
-                    .foregroundStyle(CafadePalette.mist)
-                HStack(spacing: 8) {
-                    Image(systemName: events.isEmpty || estimate.maxMg < 1 ? "circle.dashed" : "clock.arrow.circlepath")
-                        .foregroundStyle(CafadePalette.mint)
-                    Text(estimateDetail(for: estimate))
-                        .font(.caption)
-                        .foregroundStyle(CafadePalette.mist)
+                    HStack(spacing: 8) {
+                        Image(systemName: events.isEmpty || estimate.maxMg < 1 ? "circle.dashed" : "clock.arrow.circlepath")
+                            .foregroundStyle(CafadePalette.mint)
+                        Text(estimateDetail(for: estimate))
+                            .font(.caption)
+                            .foregroundStyle(CafadePalette.mist)
+                    }
                 }
             }
         }
@@ -182,18 +199,6 @@ struct TodayView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 CafadeSectionLabel(eyebrow: "RECENT", title: "Your day")
-                Spacer()
-                Button {
-                    isLogSheetPresented = true
-                } label: {
-                    Label("Log caffeine", systemImage: "plus")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(CafadePalette.ink)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 10)
-                        .background(CafadePalette.saffron, in: Capsule())
-                }
-                .accessibilityIdentifier("today.logCaffeine")
             }
 
             if events.isEmpty {

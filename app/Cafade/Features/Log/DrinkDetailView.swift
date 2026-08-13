@@ -171,7 +171,7 @@ struct DrinkDetailView: View {
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
                 }
-                Text("Verified (selectedItem.verifiedAt.formatted(date: .abbreviated, time: .omitted))")
+                Text("Verified \(selectedItem.verifiedAt.formatted(date: .abbreviated, time: .omitted))")
                     .font(.caption2)
             }
             .foregroundStyle(CafadePalette.mint)
