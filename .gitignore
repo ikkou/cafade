@@ -1,4 +1,8 @@
 .DS_Store
+.build/
+DerivedData/
+app/Config/RevenueCat.local.xcconfig
+app/*.xcodeproj/xcuserdata/
 
 # Xcode
 DerivedData/

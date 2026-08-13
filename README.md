@@ -16,14 +16,15 @@ The product promise is:
 - `site/privacy/`: privacy policy.
 - `site/terms/`: app terms and Apple subscription links.
 
-The iOS source will be added to this repository under `app/` once the Xcode project is created.
+The iOS source lives under `app/`. The app is generated from `app/project.yml` with XcodeGen.
+The catalog and calculation layers are kept separate from SwiftUI screens so US and future market data can be added without changing the model or paywall flow.
 
 ## Website
 
 The public site is intended for Cloudflare Pages with the GitHub `main` branch as the production source.
 
 ```text
-Root directory: site
+Root directory: repository root
 Build command: none
 Output directory: site
 Production URL: https://cafade.oneshotstar.com
@@ -44,3 +45,11 @@ Packages: monthly, yearly
 ```
 
 Secret RevenueCat credentials and Apple private keys must never be committed to this repository.
+
+For local purchase configuration, create `app/Config/RevenueCat.local.xcconfig` and add:
+
+```text
+REVENUECAT_API_KEY = your_public_sdk_key
+```
+
+The local file is ignored by Git. The app remains usable without it; purchase and restore become active after the RevenueCat offering is connected.

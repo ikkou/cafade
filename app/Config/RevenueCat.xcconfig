@@ -1,0 +1,4 @@
+// Keep this file safe to commit. Put a real public SDK key in
+// RevenueCat.local.xcconfig on the local machine or CI.
+REVENUECAT_API_KEY =
+#include? "RevenueCat.local.xcconfig"

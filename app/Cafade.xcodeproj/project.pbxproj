@@ -1,0 +1,662 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		14B71A3B22EDA9B574A73864 /* CafadeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8069566D4EADB1D3179B67E /* CafadeApp.swift */; };
+		23D091C3148E4C8F5C0A4DCA /* EntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19A7E44D85816B78CD50DBA /* EntitlementService.swift */; };
+		286EEA8CA48A7C55B6DC4CD1 /* CafadeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13440F013B20C092F6E75C1F /* CafadeTheme.swift */; };
+		4526D378254E2A5D796E4802 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4109D48D5C9AADE970DCC23A /* HealthKitService.swift */; };
+		4E875A66C1FC1567AF651EE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D2727C7488F6AF4446E6733 /* Assets.xcassets */; };
+		5583A48F300D874BBB83BC9A /* CaffeineCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3FC017412AFB3DD06D960F /* CaffeineCalculator.swift */; };
+		6775D916049218C91C9EEBF9 /* EntryEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */; };
+		6F92A9783E70294E60E40D59 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 70517F50BB64ADAF9BAF7562 /* RevenueCat */; };
+		7499C01661541B38492AD0F7 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97C1284FEA9EB390C34A616 /* TodayView.swift */; };
+		74F626355B395607225A43E6 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62384996BDE7C551887DEB63 /* HistoryView.swift */; };
+		7B642411CC60B3A782DC9898 /* CustomDrinkEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */; };
+		83977AAFF451C928713C5556 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8ADCE4D9FFF24FA0A63848E /* Models.swift */; };
+		88A352709816C09E3884A9D9 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB561C659194A24E6D93C9A6 /* PaywallView.swift */; };
+		8A310CA8761FF0CFA2A25902 /* SleepComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88AEB97DA86E370F81E5EFFC /* SleepComparisonView.swift */; };
+		9200A0AE9CDE24932917BC96 /* DrinkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */; };
+		9E7B5AD8330846C8029C5900 /* LogCaffeineSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA339BEAD042CDE4925659C /* LogCaffeineSheet.swift */; };
+		A5F11A8F624403CBEBD38956 /* CaffeineCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */; };
+		A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */; };
+		AB601E6C9C2ED2BC1BB0DED2 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0904E00219151BEC4E907999 /* InsightsView.swift */; };
+		B6ABCC98A0A56D51AE490483 /* EstimateInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */; };
+		DE76819259FA106D179F0B76 /* CafadeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */; };
+		F524DA56B14E01E6BDBB768E /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DA331582509F0DDCDEA104 /* AppServices.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9D90E69585949FF983CA1B36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FD1424A63203AEA1C9D7F52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A298EB3E63E71A86F514B11;
+			remoteInfo = Cafade;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		001269F794195566CA00EC40 /* Cafade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cafade.entitlements; sourceTree = "<group>"; };
+		0904E00219151BEC4E907999 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		13440F013B20C092F6E75C1F /* CafadeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeTheme.swift; sourceTree = "<group>"; };
+		358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDrinkEditorView.swift; sourceTree = "<group>"; };
+		377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EstimateInfoView.swift; sourceTree = "<group>"; };
+		38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorSheet.swift; sourceTree = "<group>"; };
+		3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Cafade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4109D48D5C9AADE970DCC23A /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkDetailView.swift; sourceTree = "<group>"; };
+		5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaffeineCatalog.swift; sourceTree = "<group>"; };
+		5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = RevenueCat.xcconfig; sourceTree = "<group>"; };
+		62384996BDE7C551887DEB63 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CafadeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F3FC017412AFB3DD06D960F /* CaffeineCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaffeineCalculator.swift; sourceTree = "<group>"; };
+		75DA331582509F0DDCDEA104 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
+		7B412727CE66E471465078C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7D2727C7488F6AF4446E6733 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		88AEB97DA86E370F81E5EFFC /* SleepComparisonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepComparisonView.swift; sourceTree = "<group>"; };
+		A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeTests.swift; sourceTree = "<group>"; };
+		AB561C659194A24E6D93C9A6 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		ACA339BEAD042CDE4925659C /* LogCaffeineSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCaffeineSheet.swift; sourceTree = "<group>"; };
+		D8ADCE4D9FFF24FA0A63848E /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		F19A7E44D85816B78CD50DBA /* EntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementService.swift; sourceTree = "<group>"; };
+		F8069566D4EADB1D3179B67E /* CafadeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeApp.swift; sourceTree = "<group>"; };
+		F97C1284FEA9EB390C34A616 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1C4993BCE70C87B53865BDE7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F92A9783E70294E60E40D59 /* RevenueCat in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0112FDBB45ADD6242E417E1E /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				AB561C659194A24E6D93C9A6 /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
+		0B1233B3A2EE2C468EEA5A47 /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				F97C1284FEA9EB390C34A616 /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		0F42F3A462D49927F003EF36 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		141F76EB232C058138C61503 = {
+			isa = PBXGroup;
+			children = (
+				5A591AD0F4EBE0BE36717516 /* Cafade */,
+				BDFD71AAF3D6F231F5E2B24E /* CafadeTests */,
+				0F42F3A462D49927F003EF36 /* Config */,
+				77495C38B045CAF8776E4210 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5A591AD0F4EBE0BE36717516 /* Cafade */ = {
+			isa = PBXGroup;
+			children = (
+				A69F2589E501A667BF511B80 /* App */,
+				BDE26D21E37889D54C0CC678 /* Design */,
+				AD0875D2559D42AC503FE370 /* Domain */,
+				9D94AF4CF126A5D7A6692D8A /* Features */,
+				67B23CA0871B13FDC8521B5F /* Resources */,
+				E0453FAD0AA25B93515DD268 /* Services */,
+			);
+			path = Cafade;
+			sourceTree = "<group>";
+		};
+		6095BA920E3CB801A4972F8D /* Log */ = {
+			isa = PBXGroup;
+			children = (
+				358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */,
+				418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */,
+				ACA339BEAD042CDE4925659C /* LogCaffeineSheet.swift */,
+			);
+			path = Log;
+			sourceTree = "<group>";
+		};
+		67B23CA0871B13FDC8521B5F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7D2727C7488F6AF4446E6733 /* Assets.xcassets */,
+				001269F794195566CA00EC40 /* Cafade.entitlements */,
+				7B412727CE66E471465078C5 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		77495C38B045CAF8776E4210 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */,
+				62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		915105C764A22B5DFFE5A950 /* Estimate */ = {
+			isa = PBXGroup;
+			children = (
+				377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */,
+			);
+			path = Estimate;
+			sourceTree = "<group>";
+		};
+		9BB074ACCAC88B8A76E6BDBC /* History */ = {
+			isa = PBXGroup;
+			children = (
+				38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */,
+				62384996BDE7C551887DEB63 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		9D94AF4CF126A5D7A6692D8A /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				915105C764A22B5DFFE5A950 /* Estimate */,
+				9BB074ACCAC88B8A76E6BDBC /* History */,
+				B204DF2266536B7E0DF1E96E /* Insights */,
+				6095BA920E3CB801A4972F8D /* Log */,
+				0112FDBB45ADD6242E417E1E /* Paywall */,
+				AF2178D6BF88E298467CDD36 /* Settings */,
+				EF6243C70205033AF9946B84 /* Sleep */,
+				0B1233B3A2EE2C468EEA5A47 /* Today */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		A69F2589E501A667BF511B80 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F8069566D4EADB1D3179B67E /* CafadeApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AD0875D2559D42AC503FE370 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				6F3FC017412AFB3DD06D960F /* CaffeineCalculator.swift */,
+				5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */,
+				D8ADCE4D9FFF24FA0A63848E /* Models.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		AF2178D6BF88E298467CDD36 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		B204DF2266536B7E0DF1E96E /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				0904E00219151BEC4E907999 /* InsightsView.swift */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		BDE26D21E37889D54C0CC678 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				13440F013B20C092F6E75C1F /* CafadeTheme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		BDFD71AAF3D6F231F5E2B24E /* CafadeTests */ = {
+			isa = PBXGroup;
+			children = (
+				A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */,
+			);
+			path = CafadeTests;
+			sourceTree = "<group>";
+		};
+		E0453FAD0AA25B93515DD268 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				75DA331582509F0DDCDEA104 /* AppServices.swift */,
+				F19A7E44D85816B78CD50DBA /* EntitlementService.swift */,
+				4109D48D5C9AADE970DCC23A /* HealthKitService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		EF6243C70205033AF9946B84 /* Sleep */ = {
+			isa = PBXGroup;
+			children = (
+				88AEB97DA86E370F81E5EFFC /* SleepComparisonView.swift */,
+			);
+			path = Sleep;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8A298EB3E63E71A86F514B11 /* Cafade */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEE4DBD534ECD31D046AB2D6 /* Build configuration list for PBXNativeTarget "Cafade" */;
+			buildPhases = (
+				6C2B940E087ADFE0B107004A /* Sources */,
+				CE1B59608BFC68D75A575BC2 /* Resources */,
+				1C4993BCE70C87B53865BDE7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cafade;
+			packageProductDependencies = (
+				70517F50BB64ADAF9BAF7562 /* RevenueCat */,
+			);
+			productName = Cafade;
+			productReference = 3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AB1A4FD5EAA20F4C957B945D /* CafadeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7D78BAC7FB7AED9C591CD1D6 /* Build configuration list for PBXNativeTarget "CafadeTests" */;
+			buildPhases = (
+				1BD00625A46B19B3E32ED9A1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C2BC85BFDAA088F836E15A49 /* PBXTargetDependency */,
+			);
+			name = CafadeTests;
+			packageProductDependencies = (
+			);
+			productName = CafadeTests;
+			productReference = 62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6FD1424A63203AEA1C9D7F52 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					8A298EB3E63E71A86F514B11 = {
+						DevelopmentTeam = FKJ2A4RLF5;
+						ProvisioningStyle = Automatic;
+					};
+					AB1A4FD5EAA20F4C957B945D = {
+						DevelopmentTeam = FKJ2A4RLF5;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 207B7173358D1E38AD566BC1 /* Build configuration list for PBXProject "Cafade" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 141F76EB232C058138C61503;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 77495C38B045CAF8776E4210 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8A298EB3E63E71A86F514B11 /* Cafade */,
+				AB1A4FD5EAA20F4C957B945D /* CafadeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CE1B59608BFC68D75A575BC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E875A66C1FC1567AF651EE6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1BD00625A46B19B3E32ED9A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE76819259FA106D179F0B76 /* CafadeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C2B940E087ADFE0B107004A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F524DA56B14E01E6BDBB768E /* AppServices.swift in Sources */,
+				14B71A3B22EDA9B574A73864 /* CafadeApp.swift in Sources */,
+				286EEA8CA48A7C55B6DC4CD1 /* CafadeTheme.swift in Sources */,
+				5583A48F300D874BBB83BC9A /* CaffeineCalculator.swift in Sources */,
+				A5F11A8F624403CBEBD38956 /* CaffeineCatalog.swift in Sources */,
+				7B642411CC60B3A782DC9898 /* CustomDrinkEditorView.swift in Sources */,
+				9200A0AE9CDE24932917BC96 /* DrinkDetailView.swift in Sources */,
+				23D091C3148E4C8F5C0A4DCA /* EntitlementService.swift in Sources */,
+				6775D916049218C91C9EEBF9 /* EntryEditorSheet.swift in Sources */,
+				B6ABCC98A0A56D51AE490483 /* EstimateInfoView.swift in Sources */,
+				4526D378254E2A5D796E4802 /* HealthKitService.swift in Sources */,
+				74F626355B395607225A43E6 /* HistoryView.swift in Sources */,
+				AB601E6C9C2ED2BC1BB0DED2 /* InsightsView.swift in Sources */,
+				9E7B5AD8330846C8029C5900 /* LogCaffeineSheet.swift in Sources */,
+				83977AAFF451C928713C5556 /* Models.swift in Sources */,
+				88A352709816C09E3884A9D9 /* PaywallView.swift in Sources */,
+				A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */,
+				8A310CA8761FF0CFA2A25902 /* SleepComparisonView.swift in Sources */,
+				7499C01661541B38492AD0F7 /* TodayView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C2BC85BFDAA088F836E15A49 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8A298EB3E63E71A86F514B11 /* Cafade */;
+			targetProxy = 9D90E69585949FF983CA1B36 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		61723913E33FDC7A16BE5073 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = FKJ2A4RLF5;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		6E9BE97D765A0F1070294857 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = FKJ2A4RLF5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D347BEA813CB729199B8426A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Cafade/Resources/Cafade.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Cafade/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade;
+				PRODUCT_NAME = Cafade;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D53123ECF409530D28A83A63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cafade.app/Cafade";
+			};
+			name = Release;
+		};
+		D55FFC90EA0E076F19C65A2B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cafade.app/Cafade";
+			};
+			name = Debug;
+		};
+		EB93B01518BEEC235F8BA393 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Cafade/Resources/Cafade.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Cafade/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade;
+				PRODUCT_NAME = Cafade;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		207B7173358D1E38AD566BC1 /* Build configuration list for PBXProject "Cafade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61723913E33FDC7A16BE5073 /* Debug */,
+				6E9BE97D765A0F1070294857 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7D78BAC7FB7AED9C591CD1D6 /* Build configuration list for PBXNativeTarget "CafadeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D55FFC90EA0E076F19C65A2B /* Debug */,
+				D53123ECF409530D28A83A63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BEE4DBD534ECD31D046AB2D6 /* Build configuration list for PBXNativeTarget "Cafade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D347BEA813CB729199B8426A /* Debug */,
+				EB93B01518BEEC235F8BA393 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.43.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		70517F50BB64ADAF9BAF7562 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6FD1424A63203AEA1C9D7F52 /* Project object */;
+}

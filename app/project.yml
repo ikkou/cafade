@@ -1,0 +1,71 @@
+name: Cafade
+
+options:
+  bundleIdPrefix: com.oneshotstar
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "27.0"
+  generateEmptyDirectories: true
+
+packages:
+  RevenueCat:
+    url: https://github.com/RevenueCat/purchases-ios-spm.git
+    from: 5.43.0
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: FKJ2A4RLF5
+    CODE_SIGN_STYLE: Automatic
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+
+targets:
+  Cafade:
+    type: application
+    platform: iOS
+    sources:
+      - path: Cafade
+    resources:
+      - path: Cafade/Resources/Assets.xcassets
+    dependencies:
+      - package: RevenueCat
+        product: RevenueCat
+    configFiles:
+      Debug: Config/RevenueCat.xcconfig
+      Release: Config/RevenueCat.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oneshotstar.cafade
+        PRODUCT_NAME: Cafade
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Cafade/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Cafade/Resources/Cafade.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_EMIT_LOC_STRINGS: YES
+  CafadeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: CafadeTests
+    dependencies:
+      - target: Cafade
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oneshotstar.cafade.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Cafade:
+    build:
+      targets:
+        Cafade: all
+        CafadeTests: [test]
+    test:
+      targets:
+        - CafadeTests

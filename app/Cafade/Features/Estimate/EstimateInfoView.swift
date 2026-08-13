@@ -1,0 +1,133 @@
+import SwiftData
+import SwiftUI
+
+struct EstimateInfoView: View {
+    @Query private var settings: [UserSettings]
+
+    private var halfLife: Int { settings.first?.halfLifeHours ?? 4 }
+
+    var body: some View {
+        ZStack {
+            CafadeBackground()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    header
+                    halfLifeCard
+                    explanation
+                    disclaimer
+                }
+                .padding(20)
+                .padding(.bottom, 30)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .navigationTitle("How the estimate works")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("THE MODEL")
+                .font(.caption.weight(.semibold))
+                .tracking(1.8)
+                .foregroundStyle(CafadePalette.saffron)
+            Text("Caffeine leaves the body gradually.")
+                .font(.system(.title, design: .serif).weight(.medium))
+                .foregroundStyle(CafadePalette.paper)
+            Text("Cafade keeps the math simple enough to understand and useful enough to guide a decision.")
+                .font(.subheadline)
+                .foregroundStyle(CafadePalette.mist)
+        }
+    }
+
+    private var halfLifeCard: some View {
+        CafadeGlassCard(tint: CafadePalette.saffron.opacity(0.08)) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("YOUR SELECTED HALF-LIFE")
+                        .font(.caption.weight(.semibold))
+                        .tracking(1.3)
+                        .foregroundStyle(CafadePalette.saffron)
+                    Spacer()
+                    Text("\(halfLife) hours")
+                        .font(.headline.monospacedDigit())
+                        .foregroundStyle(CafadePalette.paper)
+                }
+                HalfLifeStepsView(halfLifeHours: halfLife)
+                Text("After each half-life, the estimated amount is reduced by half.")
+                    .font(.caption)
+                    .foregroundStyle(CafadePalette.mist)
+            }
+        }
+    }
+
+    private var explanation: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            ExplanationRow(number: "01", title: "Each drink starts its own curve", detail: "Cafade keeps every logged drink and its consumed time separate.")
+            ExplanationRow(number: "02", title: "The curves are added together", detail: "The current estimate is the sum of all caffeine still remaining from your entries.")
+            ExplanationRow(number: "03", title: "Your model is a setting, not a diagnosis", detail: "Choose 2, 4, 6, or 8 hours to see how the estimate changes. It does not measure your personal metabolism.")
+        }
+    }
+
+    private var disclaimer: some View {
+        Text("This is an estimate, not a measurement or medical advice. Caffeine values can vary by product, size, recipe, preparation, and person.")
+            .font(.caption)
+            .foregroundStyle(CafadePalette.mist)
+            .padding(16)
+            .background(CafadePalette.coral.opacity(0.10), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(CafadePalette.coral.opacity(0.25), lineWidth: 1))
+    }
+}
+
+private struct HalfLifeStepsView: View {
+    let halfLifeHours: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(Array([100, 50, 25, 13].enumerated()), id: \.offset) { index, value in
+                VStack(spacing: 7) {
+                    ZStack(alignment: .bottom) {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(CafadePalette.paper.opacity(0.08))
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(index == 0 ? CafadePalette.saffron : CafadePalette.saffron.opacity(0.72))
+                            .frame(height: max(12, CGFloat(value) / 100 * 66))
+                    }
+                    .frame(height: 70)
+                    Text(index == 0 ? "Now" : "\(index)×")
+                        .font(.caption2)
+                        .foregroundStyle(CafadePalette.mist)
+                    Text("\(value)%")
+                        .font(.caption2.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(CafadePalette.paper)
+                }
+                if index < 3 { Spacer(minLength: 0) }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("After one half-life, 50 percent remains. After two, 25 percent remains.")
+    }
+}
+
+private struct ExplanationRow: View {
+    let number: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 13) {
+            Text(number)
+                .font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(CafadePalette.saffron)
+                .frame(width: 28, alignment: .leading)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(CafadePalette.paper)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(CafadePalette.mist)
+            }
+        }
+    }
+}
