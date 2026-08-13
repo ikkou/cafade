@@ -1,0 +1,15 @@
+.DS_Store
+
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Local website tooling
+site/node_modules/
+site/.wrangler/
+site/dist/
+.env
+.env.*
+!.env.example
