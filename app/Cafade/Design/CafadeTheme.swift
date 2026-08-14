@@ -408,6 +408,8 @@ struct CaffeineCurveView: View {
             centeredAt: now,
             halfLifeHours: halfLifeHours
         )
+        let timelineStart = now.addingTimeInterval(-12 * 3600)
+        let timelineDuration = 24 * 3600.0
 
         VStack(spacing: 10) {
             Canvas { context, size in
@@ -480,6 +482,35 @@ struct CaffeineCurveView: View {
                     Path(ellipseIn: CGRect(x: nowPoint.x - 3.5, y: nowPoint.y - 3.5, width: 7, height: 7)),
                     with: .color(CafadePalette.saffron)
                 )
+
+                for event in events where timelineStart <= event.consumedAt && event.consumedAt <= now.addingTimeInterval(12 * 3600) {
+                    let progress = event.consumedAt.timeIntervalSince(timelineStart) / timelineDuration
+                    let markerEstimate = CaffeineCalculator.estimate(
+                        events: events,
+                        at: event.consumedAt,
+                        halfLifeHours: halfLifeHours
+                    )
+                    let markerPoint = CGPoint(
+                        x: size.width * min(max(progress, 0), 1),
+                        y: size.height - size.height * CGFloat(markerEstimate.typicalMg / yMax)
+                    )
+                    context.stroke(
+                        Path { path in
+                            path.move(to: CGPoint(x: markerPoint.x, y: max(0, markerPoint.y - 22)))
+                            path.addLine(to: markerPoint)
+                        },
+                        with: .color(CafadePalette.saffron.opacity(0.34)),
+                        style: StrokeStyle(lineWidth: 1, dash: [3, 4])
+                    )
+                    context.fill(
+                        Path(ellipseIn: CGRect(x: markerPoint.x - 5, y: markerPoint.y - 5, width: 10, height: 10)),
+                        with: .color(CafadePalette.surface)
+                    )
+                    context.fill(
+                        Path(ellipseIn: CGRect(x: markerPoint.x - 3, y: markerPoint.y - 3, width: 6, height: 6)),
+                        with: .color(CafadePalette.coral)
+                    )
+                }
             }
             .frame(height: 160)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.6), value: events.count)
@@ -497,7 +528,9 @@ struct CaffeineCurveView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Caffeine fade curve for the last and next twelve hours")
-        .accessibilityValue(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText)
+        .accessibilityValue(
+            "(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText), (events.count) logged drinks"
+        )
     }
 
     private func drawEmpty(context: inout GraphicsContext, size: CGSize) {

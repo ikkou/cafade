@@ -61,6 +61,30 @@ final class CafadeTests: XCTestCase {
         XCTAssertEqual(estimate, .zero)
     }
 
+    func testMultipleIntakesAreSummedAtTheCurrentTime() {
+        let now = Date(timeIntervalSince1970: 4_000_000)
+        let earlier = IntakeEvent(
+            caffeineMg: 120,
+            consumedAt: now.addingTimeInterval(-2 * 3600),
+            sourceKind: .custom
+        )
+        let later = IntakeEvent(
+            caffeineMg: 80,
+            consumedAt: now.addingTimeInterval(-45 * 60),
+            sourceKind: .custom
+        )
+
+        let estimate = CaffeineCalculator.estimate(
+            events: [earlier, later],
+            at: now,
+            halfLifeHours: 4
+        )
+        let expected = 120 * pow(0.5, 2.0 / 4.0) + 80 * pow(0.5, 0.75 / 4.0)
+
+        XCTAssertEqual(estimate.typicalMg, expected, accuracy: 0.01)
+        XCTAssertGreaterThan(estimate.typicalMg, 120 * pow(0.5, 2.0 / 4.0))
+    }
+
     func testCatalogServingLabelsFollowSelectedUnits() {
         let coldBrew = CaffeineCatalog.item(id: "starbucks.cold-brew.grande")
 
