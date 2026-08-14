@@ -14,10 +14,11 @@ struct TodayView: View {
     @State private var isShareCardPresented = false
     @State private var showingHealthPrompt = false
     @State private var healthErrorMessage: String?
+    @State private var currentTime = Date.now
     @AppStorage("cafade.hasShownHealthPrompt") private var hasShownHealthPrompt = false
 
     private var userSettings: UserSettings? { settings.first }
-    private var now: Date { .now }
+    private var now: Date { currentTime }
 
     init(openSettings: @escaping () -> Void = {}) {
         self.openSettings = openSettings
@@ -73,7 +74,15 @@ struct TodayView: View {
             .task {
                 await maybeShowHealthPrompt()
             }
+            .task(id: "caffeine-clock") {
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(60))
+                    guard !Task.isCancelled else { return }
+                    currentTime = .now
+                }
+            }
             .onChange(of: events.count) { oldCount, newCount in
+                currentTime = .now
                 guard newCount > oldCount else { return }
                 Task { await maybeShowHealthPrompt() }
             }
@@ -108,7 +117,7 @@ struct TodayView: View {
     private var header: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                Text(now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(CafadePalette.saffron)
                     .textCase(.uppercase)

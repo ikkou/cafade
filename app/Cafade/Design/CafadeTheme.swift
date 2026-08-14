@@ -13,6 +13,7 @@ enum CafadePalette {
     static let coffee = Color(red: 0.72, green: 0.29, blue: 0.055)
     static let coffeeLight = Color(red: 1.00, green: 0.67, blue: 0.29)
     static let coffeeGlow = Color(red: 1.00, green: 0.82, blue: 0.55)
+    static let buttonInk = Color(red: 0.20, green: 0.15, blue: 0.12)
     static let plumShadow = Color(red: 0.34, green: 0.30, blue: 0.56)
     static let mint = Color(red: 0.22, green: 0.47, blue: 0.30)
     static let sky = Color(red: 0.28, green: 0.40, blue: 0.70)
@@ -44,6 +45,13 @@ struct CafadeBackground: View {
                 .frame(width: 380, height: 380)
                 .blur(radius: 96)
                 .offset(x: -178, y: 320)
+            LinearGradient(
+                colors: [.clear, CafadePalette.background.opacity(0.92)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 132)
+            .frame(maxHeight: .infinity, alignment: .bottom)
         }
         .ignoresSafeArea()
     }
@@ -356,8 +364,8 @@ struct CafadePrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(CafadePalette.surface)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .background(CafadePalette.ink, in: Capsule())
-            .shadow(color: CafadePalette.ink.opacity(0.16), radius: 10, y: 5)
+            .background(CafadePalette.buttonInk, in: Capsule())
+            .shadow(color: CafadePalette.buttonInk.opacity(0.14), radius: 10, y: 5)
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.easeOut(duration: 0.18), value: configuration.isPressed)
     }
@@ -425,32 +433,27 @@ struct CaffeineCurveView: View {
                     return CGPoint(x: x, y: y)
                 }
 
-                var area = Path()
-                var line = Path()
-                for index in points.indices {
-                    let point = coordinate(index)
-                    if index == points.startIndex {
-                        line.move(to: point)
-                        area.move(to: CGPoint(x: point.x, y: size.height))
-                        area.addLine(to: point)
-                    } else {
-                        line.addLine(to: point)
-                        area.addLine(to: point)
-                    }
-                }
-                if let last = points.indices.last {
-                    let point = coordinate(last)
-                    area.addLine(to: CGPoint(x: point.x, y: size.height))
+                let plotPoints = points.indices.map(coordinate)
+                let line = smoothPath(for: plotPoints)
+                var area = line
+                if let first = plotPoints.first, let last = plotPoints.last {
+                    area.addLine(to: CGPoint(x: last.x, y: size.height))
+                    area.addLine(to: CGPoint(x: first.x, y: size.height))
                     area.closeSubpath()
                 }
 
                 context.fill(
                     area,
                     with: .linearGradient(
-                        Gradient(colors: [CafadePalette.coffeeLight.opacity(0.42), CafadePalette.saffron.opacity(0.18), CafadePalette.lavender.opacity(0.18), .clear]),
+                        Gradient(colors: [CafadePalette.coffeeLight.opacity(0.52), CafadePalette.saffron.opacity(0.24), CafadePalette.lavender.opacity(0.16), .clear]),
                         startPoint: CGPoint(x: 0, y: 0),
                         endPoint: CGPoint(x: size.width, y: size.height)
                     )
+                )
+                context.stroke(
+                    line,
+                    with: .color(CafadePalette.coffeeGlow.opacity(0.24)),
+                    style: StrokeStyle(lineWidth: 12, lineCap: .round, lineJoin: .round)
                 )
                 context.stroke(
                     line,
@@ -459,13 +462,18 @@ struct CaffeineCurveView: View {
                         startPoint: .zero,
                         endPoint: CGPoint(x: size.width, y: 0)
                     ),
-                    style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round)
+                    style: StrokeStyle(lineWidth: 3.0, lineCap: .round, lineJoin: .round)
+                )
+                context.stroke(
+                    line,
+                    with: .color(Color.white.opacity(0.34)),
+                    style: StrokeStyle(lineWidth: 0.9, lineCap: .round, lineJoin: .round)
                 )
 
                 let nowIndex = points.enumerated().min {
                     abs($0.element.date.timeIntervalSince(now)) < abs($1.element.date.timeIntervalSince(now))
                 }?.offset ?? 0
-                let nowPoint = coordinate(nowIndex)
+                let nowPoint = plotPoints[nowIndex]
                 context.stroke(
                     Path { path in
                         path.move(to: CGPoint(x: nowPoint.x, y: 0))
@@ -513,6 +521,7 @@ struct CaffeineCurveView: View {
                 }
             }
             .frame(height: 160)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.8), value: now)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.6), value: events.count)
 
             HStack {
@@ -529,8 +538,38 @@ struct CaffeineCurveView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Caffeine fade curve for the last and next twelve hours")
         .accessibilityValue(
-            "(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText), (events.count) logged drinks"
+            "\(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText), \(events.count) logged drinks"
         )
+    }
+
+    private func smoothPath(for points: [CGPoint]) -> Path {
+        guard let first = points.first else { return Path() }
+        guard points.count > 1 else {
+            return Path { path in
+                path.move(to: first)
+                path.addLine(to: first)
+            }
+        }
+
+        var path = Path()
+        path.move(to: first)
+
+        for index in 0..<(points.count - 1) {
+            let p0 = points[max(index - 1, 0)]
+            let p1 = points[index]
+            let p2 = points[index + 1]
+            let p3 = points[min(index + 2, points.count - 1)]
+            let control1 = CGPoint(
+                x: p1.x + (p2.x - p0.x) / 6,
+                y: p1.y + (p2.y - p0.y) / 6
+            )
+            let control2 = CGPoint(
+                x: p2.x - (p3.x - p1.x) / 6,
+                y: p2.y - (p3.y - p1.y) / 6
+            )
+            path.addCurve(to: p2, control1: control1, control2: control2)
+        }
+        return path
     }
 
     private func drawEmpty(context: inout GraphicsContext, size: CGSize) {
