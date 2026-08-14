@@ -133,7 +133,7 @@ struct CafadeCaffeineOrb: View {
     var body: some View {
         GeometryReader { proxy in
             let orbWidth = min(proxy.size.width * 0.88, 318)
-            let orbHeight = min(proxy.size.height * 0.78, 150)
+            let orbHeight = min(proxy.size.height * 0.90, 160)
 
             ZStack {
                 CafadeLiquidOrbShape(phase: motionPhase + 0.08)
@@ -149,8 +149,8 @@ struct CafadeCaffeineOrb: View {
                                 .init(color: CafadePalette.coffeeGlow.opacity(0.98), location: 0),
                                 .init(color: CafadePalette.coffeeLight.opacity(0.98), location: 0.26),
                                 .init(color: CafadePalette.saffron.opacity(0.96), location: 0.54),
-                                .init(color: CafadePalette.coffee.opacity(0.90), location: 0.78),
-                                .init(color: CafadePalette.plumShadow.opacity(0.44), location: 1)
+                                .init(color: CafadePalette.coffee.opacity(0.72), location: 0.82),
+                                .init(color: CafadePalette.plumShadow.opacity(0.28), location: 1)
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -171,7 +171,7 @@ struct CafadeCaffeineOrb: View {
                         CafadeLiquidOrbShape(phase: motionPhase + 0.12)
                             .fill(
                                 RadialGradient(
-                                    colors: [.clear, CafadePalette.plumShadow.opacity(0.35)],
+                                    colors: [.clear, CafadePalette.plumShadow.opacity(0.24)],
                                     center: .bottomTrailing,
                                     startRadius: orbWidth * 0.10,
                                     endRadius: orbWidth * 0.72
@@ -182,12 +182,27 @@ struct CafadeCaffeineOrb: View {
                         CafadeLiquidOrbShape(phase: motionPhase + 0.06)
                             .fill(
                                 RadialGradient(
-                                    colors: [CafadePalette.coffeeGlow.opacity(0.38), .clear],
+                                    colors: [CafadePalette.coffeeGlow.opacity(0.48), .clear],
                                     center: .bottomLeading,
                                     startRadius: 0,
                                     endRadius: orbWidth * 0.62
                                 )
                             )
+                    }
+                    .overlay {
+                        CafadeLiquidSurface(phase: motionPhase + 0.04)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.25),
+                                        CafadePalette.coffeeGlow.opacity(0.12),
+                                        .clear
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .blendMode(.screen)
                     }
                     .overlay {
                         CafadeLiquidSheen(phase: motionPhase)
@@ -196,13 +211,13 @@ struct CafadeCaffeineOrb: View {
                     }
                     .overlay {
                         CafadeLiquidOrbShape(phase: motionPhase + 0.18)
-                            .stroke(Color.white.opacity(0.64), lineWidth: 1)
-                            .padding(7)
+                            .stroke(Color.white.opacity(0.74), lineWidth: 1.25)
+                            .padding(6)
                     }
                     .overlay {
                         CafadeLiquidOrbShape(phase: motionPhase + 0.24)
-                            .stroke(CafadePalette.coffeeGlow.opacity(0.55), lineWidth: 1)
-                            .padding(15)
+                            .stroke(CafadePalette.coffeeGlow.opacity(0.68), lineWidth: 1.15)
+                            .padding(14)
                     }
                     .overlay {
                         Capsule()
@@ -222,7 +237,7 @@ struct CafadeCaffeineOrb: View {
             )
             .rotationEffect(.degrees(-7 + sin(motionPhase * .pi * 2) * 1.1))
             .offset(y: sin(motionPhase * .pi * 1.45) * 2.5)
-            .opacity(estimate.typicalMg > 0 ? 0.86 : 0.12)
+            .opacity(estimate.typicalMg > 0 ? 0.92 : 0.48)
         }
         .accessibilityHidden(true)
         .task(id: "\(estimate.typicalMg)-\(reduceMotion)") {
@@ -247,15 +262,24 @@ private struct CafadeLiquidOrbShape: Shape {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let radiusX = rect.width * 0.5
         let radiusY = rect.height * 0.5
-        let count = 12
+        let count = 14
+        let profile: [CGFloat] = [
+            0.98, 1.03, 1.02, 0.96, 0.91, 0.97, 1.06,
+            1.10, 1.06, 1.00, 1.04, 1.08, 1.04, 0.99
+        ]
+        let phaseAngle = phase * 2 * .pi
         let points = (0..<count).map { index in
             let theta = CGFloat(index) / CGFloat(count) * 2 * .pi - .pi / 2
             let wobble = 1
-                + sin(theta * 3 + phase * 2 * .pi) * 0.045
-                + cos(theta * 5 - phase * 1.4 * .pi) * 0.024
-            let yWobble = 1 + sin(theta * 2 - phase * 1.6 * .pi) * 0.028
+                + (profile[index] - 1)
+                + sin(theta * 2 + phaseAngle) * 0.032
+                + cos(theta * 3 - phaseAngle * 0.72) * 0.018
+            let xBias = 1 + sin(theta + 0.42) * 0.028
+            let yWobble = 1
+                + sin(theta * 2 - phaseAngle * 0.8) * 0.026
+                + cos(theta - 0.2) * 0.018
             return CGPoint(
-                x: center.x + cos(theta) * radiusX * wobble,
+                x: center.x + cos(theta) * radiusX * wobble * xBias,
                 y: center.y + sin(theta) * radiusY * yWobble
             )
         }
@@ -274,6 +298,33 @@ private struct CafadeLiquidOrbShape: Shape {
 
     private func midpoint(_ lhs: CGPoint, _ rhs: CGPoint) -> CGPoint {
         CGPoint(x: (lhs.x + rhs.x) * 0.5, y: (lhs.y + rhs.y) * 0.5)
+    }
+}
+
+private struct CafadeLiquidSurface: Shape {
+    var phase: CGFloat
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let drift = sin(phase * 2 * .pi) * rect.height * 0.025
+        var path = Path()
+        path.move(to: CGPoint(x: rect.width * 0.10, y: rect.height * 0.40 + drift))
+        path.addCurve(
+            to: CGPoint(x: rect.width * 0.87, y: rect.height * 0.29 - drift),
+            control1: CGPoint(x: rect.width * 0.30, y: rect.height * 0.09 - drift),
+            control2: CGPoint(x: rect.width * 0.67, y: rect.height * 0.49 + drift)
+        )
+        path.addCurve(
+            to: CGPoint(x: rect.width * 0.10, y: rect.height * 0.40 + drift),
+            control1: CGPoint(x: rect.width * 0.67, y: rect.height * 0.54 + drift),
+            control2: CGPoint(x: rect.width * 0.28, y: rect.height * 0.62 - drift)
+        )
+        path.closeSubpath()
+        return path
     }
 }
 

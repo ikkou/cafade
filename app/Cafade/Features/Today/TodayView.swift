@@ -25,7 +25,7 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         header
@@ -36,11 +36,11 @@ struct TodayView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 14)
-                    .padding(.bottom, 120)
+                    .padding(.bottom, 24)
                 }
                 .scrollIndicators(.hidden)
+
                 logButton
-                    .padding(.bottom, 70)
             }
             .background(CafadeBackground())
             .toolbar(.hidden, for: .navigationBar)
@@ -88,9 +88,20 @@ struct TodayView: View {
         }
         .buttonStyle(CafadePrimaryButtonStyle())
         .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 14)
-        .background(CafadePalette.background.opacity(0.98))
+        .padding(.top, 14)
+        .padding(.bottom, 18)
+        .background {
+            ZStack(alignment: .top) {
+                CafadePalette.background.opacity(0.98)
+                LinearGradient(
+                    colors: [.clear, CafadePalette.background.opacity(0.98)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 18)
+                .offset(y: -18)
+            }
+        }
         .accessibilityIdentifier("today.logCaffeine")
     }
 
@@ -152,18 +163,19 @@ struct TodayView: View {
                         .frame(height: 168)
                         .padding(.horizontal, 18)
                     VStack(spacing: 4) {
+                        let orbText = estimate.typicalMg > 0 ? Color.white : CafadePalette.ink
                         HStack(alignment: .lastTextBaseline, spacing: 7) {
                             Text(estimate.shortDisplayText)
                                 .font(.system(size: 50, weight: .regular, design: .serif))
                                 .monospacedDigit()
-                                .foregroundStyle(Color.white)
+                                .foregroundStyle(orbText)
                             Text("mg")
                                 .font(.system(size: 19, weight: .medium, design: .serif))
-                                .foregroundStyle(Color.white.opacity(0.9))
+                                .foregroundStyle(orbText.opacity(0.9))
                         }
                         Text(estimate.maxMg < 1 ? "waiting for your first log" : "fading slowly  ↘")
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.white.opacity(0.88))
+                            .foregroundStyle(orbText.opacity(0.88))
                     }
                 }
                 .padding(.vertical, 6)
