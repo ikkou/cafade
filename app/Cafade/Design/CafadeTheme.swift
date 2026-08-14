@@ -10,6 +10,10 @@ enum CafadePalette {
     static let paper = ink
     static let mist = Color(red: 0.40, green: 0.38, blue: 0.35)
     static let saffron = Color(red: 0.91, green: 0.43, blue: 0.12)
+    static let coffee = Color(red: 0.72, green: 0.29, blue: 0.055)
+    static let coffeeLight = Color(red: 1.00, green: 0.67, blue: 0.29)
+    static let coffeeGlow = Color(red: 1.00, green: 0.82, blue: 0.55)
+    static let plumShadow = Color(red: 0.34, green: 0.30, blue: 0.56)
     static let mint = Color(red: 0.22, green: 0.47, blue: 0.30)
     static let sky = Color(red: 0.28, green: 0.40, blue: 0.70)
     static let coral = Color(red: 0.83, green: 0.26, blue: 0.12)
@@ -124,45 +128,173 @@ struct CafadePill: View {
 struct CafadeCaffeineOrb: View {
     let estimate: CaffeineEstimate
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var motionPhase = 0.0
+    @State private var motionPhase: CGFloat = 0
 
     var body: some View {
-        ZStack {
-            Ellipse()
-                .fill(
-                    LinearGradient(
-                        colors: [CafadePalette.saffron.opacity(0.82), CafadePalette.coral.opacity(0.68), CafadePalette.lavender.opacity(0.44)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+        GeometryReader { proxy in
+            let orbWidth = min(proxy.size.width * 0.88, 318)
+            let orbHeight = min(proxy.size.height * 0.78, 150)
+
+            ZStack {
+                CafadeLiquidOrbShape(phase: motionPhase + 0.08)
+                    .fill(CafadePalette.plumShadow.opacity(0.22))
+                    .frame(width: orbWidth * 0.96, height: orbHeight * 0.82)
+                    .blur(radius: 15)
+                    .offset(x: 12, y: 15)
+
+                CafadeLiquidOrbShape(phase: motionPhase)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: CafadePalette.coffeeGlow.opacity(0.98), location: 0),
+                                .init(color: CafadePalette.coffeeLight.opacity(0.98), location: 0.26),
+                                .init(color: CafadePalette.saffron.opacity(0.96), location: 0.54),
+                                .init(color: CafadePalette.coffee.opacity(0.90), location: 0.78),
+                                .init(color: CafadePalette.plumShadow.opacity(0.44), location: 1)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .overlay {
-                    Ellipse()
-                        .stroke(CafadePalette.surface.opacity(0.7), lineWidth: 1)
-                        .padding(5)
-                }
-                .shadow(color: CafadePalette.saffron.opacity(0.28), radius: 18, y: 8)
-            Ellipse()
-                .stroke(CafadePalette.surface.opacity(0.55), lineWidth: 1)
-                .padding(16)
-            Circle()
-                .fill(CafadePalette.surface.opacity(0.82))
-                .frame(width: 9, height: 9)
+                    .overlay {
+                        CafadeLiquidOrbShape(phase: motionPhase)
+                            .fill(
+                                RadialGradient(
+                                    colors: [Color.white.opacity(0.48), .clear],
+                                    center: .topLeading,
+                                    startRadius: 0,
+                                    endRadius: orbWidth * 0.62
+                                )
+                            )
+                    }
+                    .overlay {
+                        CafadeLiquidOrbShape(phase: motionPhase + 0.12)
+                            .fill(
+                                RadialGradient(
+                                    colors: [.clear, CafadePalette.plumShadow.opacity(0.35)],
+                                    center: .bottomTrailing,
+                                    startRadius: orbWidth * 0.10,
+                                    endRadius: orbWidth * 0.72
+                                )
+                            )
+                    }
+                    .overlay {
+                        CafadeLiquidOrbShape(phase: motionPhase + 0.06)
+                            .fill(
+                                RadialGradient(
+                                    colors: [CafadePalette.coffeeGlow.opacity(0.38), .clear],
+                                    center: .bottomLeading,
+                                    startRadius: 0,
+                                    endRadius: orbWidth * 0.62
+                                )
+                            )
+                    }
+                    .overlay {
+                        CafadeLiquidSheen(phase: motionPhase)
+                            .stroke(Color.white.opacity(0.52), lineWidth: 1.15)
+                            .blur(radius: 0.15)
+                    }
+                    .overlay {
+                        CafadeLiquidOrbShape(phase: motionPhase + 0.18)
+                            .stroke(Color.white.opacity(0.64), lineWidth: 1)
+                            .padding(7)
+                    }
+                    .overlay {
+                        CafadeLiquidOrbShape(phase: motionPhase + 0.24)
+                            .stroke(CafadePalette.coffeeGlow.opacity(0.55), lineWidth: 1)
+                            .padding(15)
+                    }
+                    .overlay {
+                        Capsule()
+                            .fill(Color.white.opacity(0.22))
+                            .frame(width: orbWidth * 0.22, height: 11)
+                            .blur(radius: 5)
+                            .rotationEffect(.degrees(-16))
+                            .offset(x: -orbWidth * 0.22, y: -orbHeight * 0.22)
+                    }
+                    .frame(width: orbWidth, height: orbHeight)
+                    .shadow(color: CafadePalette.coffee.opacity(0.28), radius: 18, y: 8)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .scaleEffect(
+                x: 1 + sin(motionPhase * .pi * 2) * 0.018,
+                y: 1 - sin(motionPhase * .pi * 2) * 0.010
+            )
+            .rotationEffect(.degrees(-7 + sin(motionPhase * .pi * 2) * 1.1))
+            .offset(y: sin(motionPhase * .pi * 1.45) * 2.5)
+            .opacity(estimate.typicalMg > 0 ? 0.86 : 0.12)
         }
-        .scaleEffect(
-            x: 1 + CGFloat(sin(motionPhase)) * 0.035,
-            y: 1 - CGFloat(sin(motionPhase)) * 0.018
-        )
-        .rotationEffect(.degrees(-8 + sin(motionPhase) * 1.8))
-        .offset(y: CGFloat(sin(motionPhase * 0.72)) * 2.5)
-        .opacity(estimate.typicalMg > 0 ? 0.72 : 0.12)
         .accessibilityHidden(true)
-        .task(id: estimate.typicalMg) {
+        .task(id: "\(estimate.typicalMg)-\(reduceMotion)") {
+            motionPhase = 0
             guard !reduceMotion, estimate.typicalMg > 0 else { return }
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+            withAnimation(.easeInOut(duration: 3.8).repeatForever(autoreverses: true)) {
                 motionPhase = 1
             }
         }
+    }
+}
+
+private struct CafadeLiquidOrbShape: Shape {
+    var phase: CGFloat
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radiusX = rect.width * 0.5
+        let radiusY = rect.height * 0.5
+        let count = 12
+        let points = (0..<count).map { index in
+            let theta = CGFloat(index) / CGFloat(count) * 2 * .pi - .pi / 2
+            let wobble = 1
+                + sin(theta * 3 + phase * 2 * .pi) * 0.045
+                + cos(theta * 5 - phase * 1.4 * .pi) * 0.024
+            let yWobble = 1 + sin(theta * 2 - phase * 1.6 * .pi) * 0.028
+            return CGPoint(
+                x: center.x + cos(theta) * radiusX * wobble,
+                y: center.y + sin(theta) * radiusY * yWobble
+            )
+        }
+
+        var path = Path()
+        let first = midpoint(points[count - 1], points[0])
+        path.move(to: first)
+        for index in 0..<count {
+            let current = points[index]
+            let next = points[(index + 1) % count]
+            path.addQuadCurve(to: midpoint(current, next), control: current)
+        }
+        path.closeSubpath()
+        return path
+    }
+
+    private func midpoint(_ lhs: CGPoint, _ rhs: CGPoint) -> CGPoint {
+        CGPoint(x: (lhs.x + rhs.x) * 0.5, y: (lhs.y + rhs.y) * 0.5)
+    }
+}
+
+private struct CafadeLiquidSheen: Shape {
+    var phase: CGFloat
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let drift = sin(phase * 2 * .pi) * rect.height * 0.035
+        var path = Path()
+        path.move(to: CGPoint(x: rect.width * 0.10, y: rect.height * 0.36 + drift))
+        path.addCurve(
+            to: CGPoint(x: rect.width * 0.87, y: rect.height * 0.26 - drift),
+            control1: CGPoint(x: rect.width * 0.30, y: rect.height * 0.13 - drift),
+            control2: CGPoint(x: rect.width * 0.68, y: rect.height * 0.48 + drift)
+        )
+        return path
     }
 }
 
@@ -262,7 +394,7 @@ struct CaffeineCurveView: View {
                 context.fill(
                     area,
                     with: .linearGradient(
-                        Gradient(colors: [CafadePalette.saffron.opacity(0.36), CafadePalette.lavender.opacity(0.16), .clear]),
+                        Gradient(colors: [CafadePalette.coffeeLight.opacity(0.42), CafadePalette.saffron.opacity(0.18), CafadePalette.lavender.opacity(0.18), .clear]),
                         startPoint: CGPoint(x: 0, y: 0),
                         endPoint: CGPoint(x: size.width, y: size.height)
                     )
@@ -270,7 +402,7 @@ struct CaffeineCurveView: View {
                 context.stroke(
                     line,
                     with: .linearGradient(
-                        Gradient(colors: [CafadePalette.saffron, CafadePalette.coral]),
+                        Gradient(colors: [CafadePalette.coffee, CafadePalette.saffron, CafadePalette.coral]),
                         startPoint: .zero,
                         endPoint: CGPoint(x: size.width, y: 0)
                     ),

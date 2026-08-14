@@ -161,7 +161,7 @@ struct TodayView: View {
                                 .font(.system(size: 19, weight: .medium, design: .serif))
                                 .foregroundStyle(Color.white.opacity(0.9))
                         }
-                        Text(estimate.maxMg < 1 ? "waiting for your first log" : "fading slowly")
+                        Text(estimate.maxMg < 1 ? "waiting for your first log" : "fading slowly  ↘")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(Color.white.opacity(0.88))
                     }
