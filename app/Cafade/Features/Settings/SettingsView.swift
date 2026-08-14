@@ -171,17 +171,20 @@ struct SettingsView: View {
                         Text("Apple Health")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(CafadePalette.paper)
-                        Text(activeSettings?.healthKitWriteEnabled == true ? "Connected for Dietary Caffeine" : "Not connected")
+                        Text(healthStatusText)
                             .font(.caption)
                             .foregroundStyle(CafadePalette.mist)
                     }
                     Spacer()
-                    if activeSettings?.healthKitWriteEnabled == true {
+                    if services.healthKit.isWriteAuthorized || (!services.healthKit.isWriteDenied && activeSettings?.healthKitWriteEnabled == true) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(CafadePalette.mint)
+                    } else if services.healthKit.isWriteDenied {
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(CafadePalette.coral)
                     }
                 }
-                Text("Cafade writes only the entries you choose to save. It does not read sleep data in this release.")
+                Text("Cafade writes only the entries you choose to save. It does not read sleep data in this release. If you previously denied access, re-enable Dietary Caffeine in the Health app before reconnecting.")
                     .font(.caption)
                     .foregroundStyle(CafadePalette.mist)
                 Button {
@@ -205,13 +208,31 @@ struct SettingsView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(CafadePalette.paper)
                     Spacer()
-                    Picker("Units", selection: unitBinding) {
+                    Menu {
                         ForEach(UnitSystem.allCases) { unit in
-                            Text(unit.title).tag(unit)
+                            Button {
+                                unitBinding.wrappedValue = unit
+                            } label: {
+                                if unitBinding.wrappedValue == unit {
+                                    Label(unit.title, systemImage: "checkmark")
+                                } else {
+                                    Text(unit.title)
+                                }
+                            }
                         }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(activeSettings?.unitSystem.title ?? UnitSystem.usCustomary.title)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .minimumScaleFactor(0.82)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2.weight(.bold))
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(CafadePalette.saffron)
                     }
-                    .pickerStyle(.menu)
-                    .tint(CafadePalette.saffron)
+                    .accessibilityLabel("Units")
                 }
                 .padding(.vertical, 14)
                 Divider().overlay(CafadePalette.line)
@@ -308,6 +329,19 @@ struct SettingsView: View {
                 saveSettings()
             }
         )
+    }
+
+    private var healthStatusText: String {
+        if services.healthKit.isWriteAuthorized {
+            return "Connected for Dietary Caffeine"
+        }
+        if services.healthKit.isWriteDenied {
+            return "Access is off in Apple Health"
+        }
+        if activeSettings?.healthKitWriteEnabled == true {
+            return "Connected for Dietary Caffeine"
+        }
+        return "Not connected"
     }
 
     private var bedtimeBinding: Binding<Date> {

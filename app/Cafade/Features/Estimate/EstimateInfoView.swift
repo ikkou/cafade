@@ -14,6 +14,7 @@ struct EstimateInfoView: View {
                     header
                     halfLifeCard
                     explanation
+                    sourceSection
                     disclaimer
                 }
                 .padding(20)
@@ -67,6 +68,72 @@ struct EstimateInfoView: View {
             ExplanationRow(number: "02", title: "The curves are added together", detail: "The current estimate is the sum of all caffeine still remaining from your entries.")
             ExplanationRow(number: "03", title: "Your model is a setting, not a diagnosis", detail: "Choose 2, 4, 6, or 8 hours to see how the estimate changes. It does not measure your personal metabolism.")
         }
+    }
+
+    private var sourceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("READ THE SOURCES")
+                .font(.caption.weight(.semibold))
+                .tracking(1.6)
+                .foregroundStyle(CafadePalette.saffron)
+
+            Text("A typical adult caffeine half-life is often reported around 3–7 hours, but it can vary with the person and context. These references explain the range and the factors behind it.")
+                .font(.caption)
+                .foregroundStyle(CafadePalette.mist)
+
+            VStack(spacing: 0) {
+                sourceLink(
+                    title: "The Safety of Ingested Caffeine",
+                    detail: "NCBI / peer-reviewed review",
+                    url: URL(string: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5445139/")!
+                )
+                Divider().overlay(CafadePalette.line)
+                sourceLink(
+                    title: "Caffeine: compound overview",
+                    detail: "NIH PubChem reference",
+                    url: URL(string: "https://pubchem.ncbi.nlm.nih.gov/compound/caffeine")!
+                )
+                Divider().overlay(CafadePalette.line)
+                sourceLink(
+                    title: "Spilling the Beans: How Much Caffeine is Too Much?",
+                    detail: "U.S. Food and Drug Administration",
+                    url: URL(string: "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much")!
+                )
+            }
+            .padding(.horizontal, 16)
+            .background(CafadePalette.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(CafadePalette.line, lineWidth: 1)
+            }
+        }
+    }
+
+    private func sourceLink(title: String, detail: String, url: URL) -> some View {
+        Link(destination: url) {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.up.right.square")
+                    .font(.title3)
+                    .foregroundStyle(CafadePalette.sky)
+                    .frame(width: 24)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(CafadePalette.ink)
+                        .multilineTextAlignment(.leading)
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(CafadePalette.mist)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(CafadePalette.mist)
+            }
+            .padding(.vertical, 14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var disclaimer: some View {

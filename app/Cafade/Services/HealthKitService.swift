@@ -11,7 +11,7 @@ enum HealthKitServiceError: LocalizedError {
         case .unavailable:
             "Apple Health is not available on this device."
         case .authorizationDenied:
-            "Cafade was not allowed to write caffeine to Apple Health."
+            "Cafade cannot write to Apple Health yet. In the Health app, open Summary > your profile > Apps > Cafade, turn on Dietary Caffeine, then try again."
         case .saveFailed:
             "Cafade could not save this caffeine entry to Apple Health."
         }
@@ -30,9 +30,20 @@ final class HealthKitService {
         HKHealthStore.isHealthDataAvailable() && caffeineType != nil
     }
 
+    var authorizationStatus: HKAuthorizationStatus {
+        guard isAvailable, let caffeineType else { return .sharingDenied }
+        return store.authorizationStatus(for: caffeineType)
+    }
+
+    var isWriteAuthorized: Bool { isAvailable && authorizationStatus == .sharingAuthorized }
+    var isWriteDenied: Bool { isAvailable && authorizationStatus == .sharingDenied }
+
     func requestAuthorization() async throws {
         guard isAvailable, let caffeineType else {
             throw HealthKitServiceError.unavailable
+        }
+        guard authorizationStatus != .sharingDenied else {
+            throw HealthKitServiceError.authorizationDenied
         }
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -102,10 +113,7 @@ final class HealthKitService {
             operatorType: .equalTo,
             value: "Cafade"
         )
-
-        let samples = try await fetchSamples(type: caffeineType, predicate: predicate)
-        guard !samples.isEmpty else { return }
-        try await delete(samples: samples)
+        try await deleteObjects(of: caffeineType, matching: predicate)
     }
 
     private func deleteSamples(for externalID: String) async throws {
@@ -118,35 +126,12 @@ final class HealthKitService {
             operatorType: .equalTo,
             value: externalID
         )
-        let samples = try await fetchSamples(type: caffeineType, predicate: predicate)
-        guard !samples.isEmpty else { return }
-        try await delete(samples: samples)
+        try await deleteObjects(of: caffeineType, matching: predicate)
     }
 
-    private func fetchSamples(
-        type: HKSampleType,
-        predicate: NSPredicate
-    ) async throws -> [HKSample] {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[HKSample], Error>) in
-            let query = HKSampleQuery(
-                sampleType: type,
-                predicate: predicate,
-                limit: HKObjectQueryNoLimit,
-                sortDescriptors: nil
-            ) { _, samples, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: samples ?? [])
-                }
-            }
-            store.execute(query)
-        }
-    }
-
-    private func delete(samples: [HKSample]) async throws {
+    private func deleteObjects(of type: HKObjectType, matching predicate: NSPredicate) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            store.delete(samples) { success, error in
+            store.deleteObjects(of: type, predicate: predicate) { success, _, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else if success {

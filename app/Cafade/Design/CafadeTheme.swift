@@ -123,6 +123,8 @@ struct CafadePill: View {
 
 struct CafadeCaffeineOrb: View {
     let estimate: CaffeineEstimate
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var motionPhase = 0.0
 
     var body: some View {
         ZStack {
@@ -147,9 +149,20 @@ struct CafadeCaffeineOrb: View {
                 .fill(CafadePalette.surface.opacity(0.82))
                 .frame(width: 9, height: 9)
         }
-        .rotationEffect(.degrees(-8))
+        .scaleEffect(
+            x: 1 + CGFloat(sin(motionPhase)) * 0.035,
+            y: 1 - CGFloat(sin(motionPhase)) * 0.018
+        )
+        .rotationEffect(.degrees(-8 + sin(motionPhase) * 1.8))
+        .offset(y: CGFloat(sin(motionPhase * 0.72)) * 2.5)
         .opacity(estimate.typicalMg > 0 ? 0.72 : 0.12)
         .accessibilityHidden(true)
+        .task(id: estimate.typicalMg) {
+            guard !reduceMotion, estimate.typicalMg > 0 else { return }
+            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                motionPhase = 1
+            }
+        }
     }
 }
 

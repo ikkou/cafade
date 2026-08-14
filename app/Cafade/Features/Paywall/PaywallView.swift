@@ -12,25 +12,27 @@ struct PaywallView: View {
     }
 
     var body: some View {
-        ZStack {
-            CafadeBackground()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    header
-                    benefits
-                    plans
-                    actionButtons
-                    legal
+        NavigationStack {
+            ZStack {
+                CafadeBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        header
+                        benefits
+                        plans
+                        actionButtons
+                        legal
+                    }
+                    .padding(22)
+                    .padding(.bottom, 30)
                 }
-                .padding(22)
-                .padding(.bottom, 30)
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Not now") { dismiss() }
-                    .foregroundStyle(CafadePalette.mist)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Not now") { dismiss() }
+                        .foregroundStyle(CafadePalette.mist)
+                }
             }
         }
         .task {
@@ -116,7 +118,7 @@ struct PaywallView: View {
                                 .font(.caption)
                                 .foregroundStyle(CafadePalette.mist)
                             if option.hasIntroductoryOffer {
-                                Text("7-day free trial")
+                                Text("7-day trial*")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(CafadePalette.mint)
                             }
@@ -160,6 +162,13 @@ struct PaywallView: View {
             if !entitlements.isConfigured {
                 Text("Subscription products will appear here after the RevenueCat public SDK key and App Store products are connected.")
                     .font(.caption)
+                    .foregroundStyle(CafadePalette.mist)
+                    .multilineTextAlignment(.center)
+            }
+
+            if entitlements.isConfigured && entitlements.displayOptions.contains(where: \.hasIntroductoryOffer) {
+                Text("* Free trials are for eligible new subscribers. Apple shows the final terms before purchase.")
+                    .font(.caption2)
                     .foregroundStyle(CafadePalette.mist)
                     .multilineTextAlignment(.center)
             }

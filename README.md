@@ -36,13 +36,20 @@ The site does not require a database, server-side runtime, analytics script, or 
 
 Cafade uses Apple in-app purchases with RevenueCat for purchase state, entitlements, offers, and restore-purchases handling.
 
-The planned RevenueCat configuration is:
+The configured RevenueCat setup is:
 
 ```text
 Offering: default
 Entitlement: pro
 Packages: monthly, yearly
 ```
+
+The Apple App Store products are `cafade_pro_monthly` and
+`cafade_pro_yearly`. The local build reads the public iOS SDK key from
+`app/Config/RevenueCat.local.xcconfig`; the ignored file is intentionally not
+part of the repository. Apple Sandbox/TestFlight purchase verification and
+the App Store submission remain release checks rather than repository
+configuration.
 
 Secret RevenueCat credentials and Apple private keys must never be committed to this repository.
 
@@ -52,4 +59,5 @@ For local purchase configuration, create `app/Config/RevenueCat.local.xcconfig` 
 REVENUECAT_API_KEY = your_public_sdk_key
 ```
 
-The local file is ignored by Git. The app remains usable without it; purchase and restore become active after the RevenueCat offering is connected.
+The local file is ignored by Git. The app remains usable without it; purchase
+and restore become active after the RevenueCat offering is connected.

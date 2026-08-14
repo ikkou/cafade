@@ -31,7 +31,9 @@ struct AppRootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            TodayView()
+            TodayView {
+                selectedTab = .settings
+            }
                 .tabItem { Label("Today", systemImage: "sun.max") }
                 .tag(AppTab.today)
 

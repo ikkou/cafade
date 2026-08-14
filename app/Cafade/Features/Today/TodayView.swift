@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct TodayView: View {
+    private let openSettings: () -> Void
+
     @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var services
     @Query(sort: \IntakeEvent.consumedAt) private var events: [IntakeEvent]
@@ -9,6 +11,7 @@ struct TodayView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
 
     @State private var isLogSheetPresented = false
+    @State private var isShareCardPresented = false
     @State private var showingHealthPrompt = false
     @State private var healthErrorMessage: String?
     @AppStorage("cafade.hasShownHealthPrompt") private var hasShownHealthPrompt = false
@@ -16,11 +19,13 @@ struct TodayView: View {
     private var userSettings: UserSettings? { settings.first }
     private var now: Date { .now }
 
+    init(openSettings: @escaping () -> Void = {}) {
+        self.openSettings = openSettings
+    }
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                CafadeBackground()
-
+            ZStack(alignment: .bottom) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         header
@@ -31,26 +36,20 @@ struct TodayView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 14)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 120)
                 }
                 .scrollIndicators(.hidden)
+                logButton
+                    .padding(.bottom, 70)
             }
+            .background(CafadeBackground())
             .toolbar(.hidden, for: .navigationBar)
-            .safeAreaInset(edge: .bottom, spacing: 8) {
-                Button {
-                    isLogSheetPresented = true
-                } label: {
-                    Text("LOG CAFFEINE")
-                }
-                .buttonStyle(CafadePrimaryButtonStyle())
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .background(CafadePalette.background.opacity(0.94))
-                .accessibilityIdentifier("today.logCaffeine")
-            }
             .sheet(isPresented: $isLogSheetPresented) {
                 LogCaffeineSheet()
                     .environment(services)
+            }
+            .sheet(isPresented: $isShareCardPresented) {
+                ShareCardSheet(snapshot: shareSnapshot)
             }
             .alert("Save your caffeine to Apple Health?", isPresented: $showingHealthPrompt) {
                 Button("Connect Apple Health") {
@@ -81,6 +80,20 @@ struct TodayView: View {
         }
     }
 
+    private var logButton: some View {
+        Button {
+            isLogSheetPresented = true
+        } label: {
+            Text("LOG CAFFEINE")
+        }
+        .buttonStyle(CafadePrimaryButtonStyle())
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 14)
+        .background(CafadePalette.background.opacity(0.98))
+        .accessibilityIdentifier("today.logCaffeine")
+    }
+
     private var header: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 5) {
@@ -94,46 +107,78 @@ struct TodayView: View {
                     .foregroundStyle(CafadePalette.paper)
             }
             Spacer()
-            NavigationLink {
-                SettingsView()
-            } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.headline)
-                    .foregroundStyle(CafadePalette.paper)
-                    .frame(width: 44, height: 44)
-                    .background(CafadePalette.paper.opacity(0.08), in: Circle())
-                    .overlay(Circle().stroke(CafadePalette.line, lineWidth: 1))
+            HStack(spacing: 8) {
+                Button {
+                    isShareCardPresented = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(CafadePalette.paper)
+                        .frame(width: 44, height: 44)
+                        .background(CafadePalette.paper.opacity(0.08), in: Circle())
+                        .overlay(Circle().stroke(CafadePalette.line, lineWidth: 1))
+                }
+                .accessibilityLabel("Share your day")
+
+                Button(action: openSettings) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.headline)
+                        .foregroundStyle(CafadePalette.paper)
+                        .frame(width: 44, height: 44)
+                        .background(CafadePalette.paper.opacity(0.08), in: Circle())
+                        .overlay(Circle().stroke(CafadePalette.line, lineWidth: 1))
+                }
+                .accessibilityLabel("Settings")
             }
-            .accessibilityLabel("Settings")
         }
     }
 
     private var estimateCard: some View {
         let estimate = currentEstimate
         return CafadeGlassCard(tint: CafadePalette.saffron.opacity(0.08)) {
-            ZStack(alignment: .bottomTrailing) {
-                CafadeCaffeineOrb(estimate: estimate)
-                    .frame(width: 164, height: 88)
-                    .offset(x: 22, y: 14)
-                VStack(alignment: .leading, spacing: 18) {
-                    HStack {
-                        Text("Estimated caffeine remaining")
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("CURRENT ESTIMATE")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.6)
+                        .foregroundStyle(CafadePalette.saffron)
+                    Spacer()
+                    CafadePill(title: "NOW", color: CafadePalette.mint)
+                }
+
+                ZStack {
+                    CafadeCaffeineOrb(estimate: estimate)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 168)
+                        .padding(.horizontal, 18)
+                    VStack(spacing: 4) {
+                        HStack(alignment: .lastTextBaseline, spacing: 7) {
+                            Text(estimate.shortDisplayText)
+                                .font(.system(size: 50, weight: .regular, design: .serif))
+                                .monospacedDigit()
+                                .foregroundStyle(Color.white)
+                            Text("mg")
+                                .font(.system(size: 19, weight: .medium, design: .serif))
+                                .foregroundStyle(Color.white.opacity(0.9))
+                        }
+                        Text(estimate.maxMg < 1 ? "waiting for your first log" : "fading slowly")
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(CafadePalette.mist)
-                        Spacer()
-                        CafadePill(title: "ESTIMATE", color: CafadePalette.saffron)
+                            .foregroundStyle(Color.white.opacity(0.88))
                     }
-                    CaffeineValueLabel(estimate: estimate, size: 58)
-                    Text(estimateSubtitle(for: estimate))
-                        .font(.subheadline)
-                        .foregroundStyle(CafadePalette.mist)
-                    HStack(spacing: 8) {
-                        Image(systemName: events.isEmpty || estimate.maxMg < 1 ? "circle.dashed" : "clock.arrow.circlepath")
-                            .foregroundStyle(CafadePalette.mint)
-                        Text(estimateDetail(for: estimate))
-                            .font(.caption)
-                            .foregroundStyle(CafadePalette.mist)
-                    }
+                }
+                .padding(.vertical, 6)
+
+                HStack(spacing: 10) {
+                    TodayMetricChip(
+                        label: "LAST DRINK",
+                        value: latestEvent.map { CaffeineFormatter.time($0.consumedAt) } ?? "—",
+                        tint: CafadePalette.saffron
+                    )
+                    TodayMetricChip(
+                        label: "SLEEP TARGET",
+                        value: userSettings?.bedtimeDate?.formatted(date: .omitted, time: .shortened) ?? "—",
+                        tint: CafadePalette.lavender
+                    )
                 }
             }
         }
@@ -143,9 +188,9 @@ struct TodayView: View {
         CafadeGlassCard {
             VStack(alignment: .leading, spacing: 16) {
                 CafadeSectionLabel(
-                    eyebrow: "THE CURVE",
+                    eyebrow: "YOUR DAY",
                     title: "Watch it fade",
-                    detail: "A simple half-life estimate across your day."
+                    detail: "A living estimate, shaped by every drink you log."
                 )
                 CaffeineCurveView(
                     events: events,
@@ -229,6 +274,20 @@ struct TodayView: View {
         )
     }
 
+    private var latestEvent: IntakeEvent? {
+        events.max(by: { $0.consumedAt < $1.consumedAt })
+    }
+
+    private var shareSnapshot: CafadeShareSnapshot {
+        let todayEvents = events.filter { Calendar.current.isDate($0.consumedAt, inSameDayAs: now) }
+        return CafadeShareSnapshot(
+            date: now,
+            estimate: currentEstimate,
+            events: todayEvents,
+            halfLifeHours: userSettings?.halfLifeHours ?? 4
+        )
+    }
+
     private func estimateSubtitle(for estimate: CaffeineEstimate) -> String {
         if events.isEmpty {
             return "Log a drink to see your estimate."
@@ -282,6 +341,34 @@ struct TodayView: View {
             try await services.requestHealthKitAndSync(events: events, settings: settings, context: modelContext)
         } catch {
             healthErrorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct TodayMetricChip: View {
+    let label: String
+    let value: String
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption2.weight(.semibold))
+                .tracking(1.1)
+                .foregroundStyle(tint)
+            Text(value)
+                .font(.subheadline.monospacedDigit().weight(.medium))
+                .foregroundStyle(CafadePalette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 11)
+        .background(CafadePalette.background.opacity(0.64), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(CafadePalette.line, lineWidth: 1)
         }
     }
 }

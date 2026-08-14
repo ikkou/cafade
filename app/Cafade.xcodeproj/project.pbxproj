@@ -26,6 +26,7 @@
 		A5F11A8F624403CBEBD38956 /* CaffeineCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */; };
 		A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */; };
 		AB601E6C9C2ED2BC1BB0DED2 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0904E00219151BEC4E907999 /* InsightsView.swift */; };
+		ADDDCD6F4BD5A0118F555333 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D28C33B40445CA3EC89330B /* ShareCardView.swift */; };
 		B6ABCC98A0A56D51AE490483 /* EstimateInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */; };
 		DE76819259FA106D179F0B76 /* CafadeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */; };
 		F524DA56B14E01E6BDBB768E /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DA331582509F0DDCDEA104 /* AppServices.swift */; };
@@ -49,6 +50,7 @@
 		377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EstimateInfoView.swift; sourceTree = "<group>"; };
 		38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorSheet.swift; sourceTree = "<group>"; };
 		3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Cafade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D28C33B40445CA3EC89330B /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		4109D48D5C9AADE970DCC23A /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkDetailView.swift; sourceTree = "<group>"; };
 		5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaffeineCatalog.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				6095BA920E3CB801A4972F8D /* Log */,
 				0112FDBB45ADD6242E417E1E /* Paywall */,
 				AF2178D6BF88E298467CDD36 /* Settings */,
+				C90E88D183EFF5E175928138 /* Share */,
 				EF6243C70205033AF9946B84 /* Sleep */,
 				0B1233B3A2EE2C468EEA5A47 /* Today */,
 			);
@@ -238,6 +241,14 @@
 				A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */,
 			);
 			path = CafadeTests;
+			sourceTree = "<group>";
+		};
+		C90E88D183EFF5E175928138 /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				3D28C33B40445CA3EC89330B /* ShareCardView.swift */,
+			);
+			path = Share;
 			sourceTree = "<group>";
 		};
 		E0453FAD0AA25B93515DD268 /* Services */ = {
@@ -382,6 +393,7 @@
 				83977AAFF451C928713C5556 /* Models.swift in Sources */,
 				88A352709816C09E3884A9D9 /* PaywallView.swift in Sources */,
 				A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */,
+				ADDDCD6F4BD5A0118F555333 /* ShareCardView.swift in Sources */,
 				8A310CA8761FF0CFA2A25902 /* SleepComparisonView.swift in Sources */,
 				7499C01661541B38492AD0F7 /* TodayView.swift in Sources */,
 			);
