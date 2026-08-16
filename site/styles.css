@@ -85,6 +85,7 @@ a {
 .site-nav a {
   opacity: 0.74;
   text-decoration: none;
+  white-space: nowrap;
   transition: opacity 160ms ease, color 160ms ease;
 }
 
@@ -187,6 +188,7 @@ a {
 }
 
 .hero-visual {
+  min-height: 650px;
   margin: 0;
   position: relative;
 }
@@ -202,12 +204,44 @@ a {
   width: 480px;
 }
 
-.hero-visual img {
-  border: 1px solid rgba(35, 27, 22, 0.12);
-  border-radius: 27%;
-  box-shadow: 0 28px 90px rgba(69, 41, 26, 0.18);
+.hero-device-stack {
+  height: 650px;
+  margin: 0 auto;
+  max-width: 520px;
   position: relative;
   width: 100%;
+}
+
+.hero-device {
+  aspect-ratio: 442 / 960;
+  background: #171310;
+  border: 8px solid #171310;
+  border-radius: 48px;
+  box-shadow: 0 28px 90px rgba(69, 41, 26, 0.2);
+  overflow: hidden;
+  position: absolute;
+}
+
+.hero-device img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.hero-device-back {
+  opacity: 0.82;
+  right: 30px;
+  top: 12px;
+  transform: rotate(7deg);
+  width: 286px;
+}
+
+.hero-device-front {
+  left: 54px;
+  top: 48px;
+  transform: rotate(-4deg);
+  width: 304px;
 }
 
 .section {
@@ -306,6 +340,99 @@ a {
   color: var(--lavender);
 }
 
+.pro-section {
+  background: var(--night);
+  color: var(--paper);
+}
+
+.pro-section .section-number,
+.pro-kicker {
+  color: #ffc083;
+}
+
+.pro-section .section-intro p,
+.pro-copy p,
+.pro-price small {
+  color: rgba(248, 243, 233, 0.66);
+}
+
+.pro-offer {
+  align-items: center;
+  border-bottom: 1px solid var(--line-dark);
+  border-top: 1px solid var(--line-dark);
+  display: grid;
+  gap: 48px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr) auto;
+  margin-top: 86px;
+  padding: 32px 0 36px;
+}
+
+.pro-kicker {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.pro-copy h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin: 0;
+}
+
+.pro-copy p {
+  margin: 18px 0 0;
+  max-width: 420px;
+}
+
+.pro-prices {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pro-price {
+  border-left: 1px solid var(--line-dark);
+  display: grid;
+  gap: 3px;
+  padding-left: 18px;
+}
+
+.pro-price span {
+  color: rgba(248, 243, 233, 0.72);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.pro-price strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.pro-price small {
+  font-size: 12px;
+}
+
+.pro-section .button {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.pro-section .button:hover,
+.pro-section .button:focus-visible {
+  background: #ffc083;
+  border-color: #ffc083;
+}
+
 .closing {
   align-items: end;
   display: flex;
@@ -317,6 +444,21 @@ a {
   color: var(--muted);
   margin: 20px 0 0;
   max-width: 480px;
+}
+
+.closing-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.inline-link {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-underline-offset: 4px;
+  white-space: nowrap;
 }
 
 .site-footer {
@@ -468,6 +610,7 @@ a {
 
   .hero-visual {
     margin: 0 -8px;
+    min-height: 580px;
   }
 
   .hero-visual::before {
@@ -475,6 +618,28 @@ a {
     left: 20%;
     top: -10%;
     width: 340px;
+  }
+
+  .hero-device-stack {
+    height: 580px;
+    max-width: 360px;
+  }
+
+  .hero-device {
+    border-radius: 38px;
+    border-width: 7px;
+  }
+
+  .hero-device-back {
+    right: 22px;
+    top: 10px;
+    width: 220px;
+  }
+
+  .hero-device-front {
+    left: 34px;
+    top: 38px;
+    width: 236px;
   }
 
   .section {
@@ -501,6 +666,16 @@ a {
     gap: 28px;
   }
 
+  .pro-offer {
+    gap: 32px;
+    grid-template-columns: 1fr;
+    margin-top: 62px;
+  }
+
+  .pro-prices {
+    max-width: 320px;
+  }
+
   .footer-inner {
     align-items: start;
     flex-direction: column;
@@ -513,6 +688,43 @@ a {
 
   .legal-content {
     padding: 66px 20px 96px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .site-nav {
+    font-size: 13px;
+    gap: 11px;
+  }
+
+  .brand {
+    font-size: 17px;
+    gap: 8px;
+  }
+
+  .hero-device-stack {
+    height: 500px;
+  }
+
+  .hero-device {
+    border-radius: 31px;
+    border-width: 6px;
+  }
+
+  .hero-device-back {
+    right: 16px;
+    width: 178px;
+  }
+
+  .hero-device-front {
+    left: 24px;
+    top: 32px;
+    width: 194px;
   }
 }
 
