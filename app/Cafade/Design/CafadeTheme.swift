@@ -219,12 +219,7 @@ struct CafadeCaffeineOrb: View {
                             .padding(14)
                     }
                     .overlay {
-                        Capsule()
-                            .fill(Color.white.opacity(0.22))
-                            .frame(width: orbWidth * 0.22, height: 11)
-                            .blur(radius: 5)
-                            .rotationEffect(.degrees(-16))
-                            .offset(x: -orbWidth * 0.22, y: -orbHeight * 0.22)
+                        CafadeLiquidHighlight(orbWidth: orbWidth, orbHeight: orbHeight)
                     }
                     .frame(width: orbWidth, height: orbHeight)
                     .shadow(color: CafadePalette.coffee.opacity(0.28), radius: 18, y: 8)
@@ -246,6 +241,20 @@ struct CafadeCaffeineOrb: View {
                 motionPhase = 1
             }
         }
+    }
+}
+
+private struct CafadeLiquidHighlight: View {
+    let orbWidth: CGFloat
+    let orbHeight: CGFloat
+
+    var body: some View {
+        Capsule()
+            .fill(Color.white.opacity(0.22))
+            .frame(width: orbWidth * 0.22, height: 11)
+            .blur(radius: 5)
+            .rotationEffect(.degrees(-16))
+            .offset(x: -orbWidth * 0.22, y: -orbHeight * 0.22)
     }
 }
 
