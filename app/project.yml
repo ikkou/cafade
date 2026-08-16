@@ -43,7 +43,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.oneshotstar.cafade
         PRODUCT_NAME: Cafade
-        MARKETING_VERSION: "1.0.0"
+        MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Cafade/Resources/Info.plist
@@ -72,7 +72,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.oneshotstar.cafade.widget
         PRODUCT_NAME: CafadeWidget
-        MARKETING_VERSION: "1.0.0"
+        MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_ENTITLEMENTS: CafadeWidget/CafadeWidget.entitlements
         APPLICATION_EXTENSION_API_ONLY: YES
