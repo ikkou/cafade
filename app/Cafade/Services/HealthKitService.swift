@@ -67,10 +67,16 @@ final class HealthKitService {
         guard isAvailable, let caffeineType else {
             throw HealthKitServiceError.unavailable
         }
+        guard isWriteAuthorized else {
+            throw HealthKitServiceError.authorizationDenied
+        }
 
         let quantity = HKQuantity(unit: .gramUnit(with: .milli), doubleValue: Double(event.caffeineMg))
         let metadata: [String: Any] = [
             HKMetadataKeyExternalUUID: event.id.uuidString,
+            HKMetadataKeySyncIdentifier: event.id.uuidString,
+            HKMetadataKeySyncVersion: event.healthKitSyncVersion,
+            HKMetadataKeyTimeZone: event.consumedTimeZoneIdentifier ?? TimeZone.current.identifier,
             "CafadeSource": "Cafade"
         ]
         let sample = HKQuantitySample(
@@ -95,7 +101,9 @@ final class HealthKitService {
     }
 
     func replace(event: IntakeEvent) async throws {
-        try await deleteSamples(for: event.id.uuidString)
+        // HealthKit replaces the object with the same sync identifier when the
+        // incoming sync version is newer. This works with write-only access and
+        // avoids asking for read permission only to edit Cafade's own sample.
         try await write(event: event)
     }
 

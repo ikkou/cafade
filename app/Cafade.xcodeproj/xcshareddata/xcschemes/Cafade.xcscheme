@@ -64,6 +64,17 @@
                ReferencedContainer = "container:Cafade.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "904D5CB1435143E5F82D5FC3"
+               BuildableName = "CafadeUITests.xctest"
+               BlueprintName = "CafadeUITests"
+               ReferencedContainer = "container:Cafade.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

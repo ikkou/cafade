@@ -7,10 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05EDA6B0877D15F09FD39B69 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 7FAF567BCEBFDB5DFF9DF172 /* PrivacyInfo.xcprivacy */; };
+		07F2EA330141557C6C420701 /* CafadeWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B657E03BFB59A4D7B755698 /* CafadeWidgetStore.swift */; };
 		14B71A3B22EDA9B574A73864 /* CafadeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8069566D4EADB1D3179B67E /* CafadeApp.swift */; };
 		23D091C3148E4C8F5C0A4DCA /* EntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19A7E44D85816B78CD50DBA /* EntitlementService.swift */; };
 		286EEA8CA48A7C55B6DC4CD1 /* CafadeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13440F013B20C092F6E75C1F /* CafadeTheme.swift */; };
+		32F1A89675BD04CB55B67C86 /* CafadeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 389D8931A48E56CF0F2986B4 /* CafadeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4526D378254E2A5D796E4802 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4109D48D5C9AADE970DCC23A /* HealthKitService.swift */; };
+		49B46C7D165EBF5EEB876422 /* CafadeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7BF71FEA7E95FA595E1164 /* CafadeUITests.swift */; };
+		4B19E5483CE590371D2AD46C /* CafadeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B992EEB58C05AAEA48C882 /* CafadeWidget.swift */; };
+		4C6B8C8D9EA6F7C0AA18A432 /* LogCaffeineFromWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE253113CBA466B2D9D909B /* LogCaffeineFromWidgetIntent.swift */; };
 		4E875A66C1FC1567AF651EE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D2727C7488F6AF4446E6733 /* Assets.xcassets */; };
 		5583A48F300D874BBB83BC9A /* CaffeineCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3FC017412AFB3DD06D960F /* CaffeineCalculator.swift */; };
 		6775D916049218C91C9EEBF9 /* EntryEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */; };
@@ -19,9 +25,12 @@
 		74F626355B395607225A43E6 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62384996BDE7C551887DEB63 /* HistoryView.swift */; };
 		7B642411CC60B3A782DC9898 /* CustomDrinkEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */; };
 		83977AAFF451C928713C5556 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8ADCE4D9FFF24FA0A63848E /* Models.swift */; };
+		8536B65261ED59524269CFAF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 44D8A228CD79E55A2AF1AF49 /* PrivacyInfo.xcprivacy */; };
 		88A352709816C09E3884A9D9 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB561C659194A24E6D93C9A6 /* PaywallView.swift */; };
 		8A310CA8761FF0CFA2A25902 /* SleepComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88AEB97DA86E370F81E5EFFC /* SleepComparisonView.swift */; };
 		9200A0AE9CDE24932917BC96 /* DrinkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */; };
+		9A7D04B705DC85E7ADDC6DDA /* ScreenshotFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB630B1BAFEF3015C2A8C044 /* ScreenshotFixture.swift */; };
+		9CDBCE52896E5617828BD6CA /* CafadeWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B657E03BFB59A4D7B755698 /* CafadeWidgetStore.swift */; };
 		9E7B5AD8330846C8029C5900 /* LogCaffeineSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA339BEAD042CDE4925659C /* LogCaffeineSheet.swift */; };
 		A5F11A8F624403CBEBD38956 /* CaffeineCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */; };
 		A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */; };
@@ -29,11 +38,27 @@
 		ADDDCD6F4BD5A0118F555333 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D28C33B40445CA3EC89330B /* ShareCardView.swift */; };
 		B6ABCC98A0A56D51AE490483 /* EstimateInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */; };
 		DE76819259FA106D179F0B76 /* CafadeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */; };
+		E7B5B6BAD6D66EB5C9A2B3B3 /* CaffeineCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BD91EDD9757C1BD5FFDDEF4 /* CaffeineCatalog.json */; };
 		F524DA56B14E01E6BDBB768E /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DA331582509F0DDCDEA104 /* AppServices.swift */; };
+		F9D9DE51E00768B00E0D59F7 /* LogCaffeineFromWidgetIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE253113CBA466B2D9D909B /* LogCaffeineFromWidgetIntent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		22E275BB394AF7F4C51C8B7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FD1424A63203AEA1C9D7F52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B9B8484CEC91EBA47835382D;
+			remoteInfo = CafadeWidgetExtension;
+		};
 		9D90E69585949FF983CA1B36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FD1424A63203AEA1C9D7F52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A298EB3E63E71A86F514B11;
+			remoteInfo = Cafade;
+		};
+		B9CF20078274FEE9390009DE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6FD1424A63203AEA1C9D7F52 /* Project object */;
 			proxyType = 1;
@@ -42,31 +67,57 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		9BAD5B6EDC4165D08C40C134 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				32F1A89675BD04CB55B67C86 /* CafadeWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		001269F794195566CA00EC40 /* Cafade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cafade.entitlements; sourceTree = "<group>"; };
 		0904E00219151BEC4E907999 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
 		13440F013B20C092F6E75C1F /* CafadeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeTheme.swift; sourceTree = "<group>"; };
+		1B657E03BFB59A4D7B755698 /* CafadeWidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeWidgetStore.swift; sourceTree = "<group>"; };
+		1BD91EDD9757C1BD5FFDDEF4 /* CaffeineCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CaffeineCatalog.json; sourceTree = "<group>"; };
+		2ED3F3798B2DF5E9FFEBF8E0 /* CafadeWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CafadeWidget.entitlements; sourceTree = "<group>"; };
+		34B992EEB58C05AAEA48C882 /* CafadeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeWidget.swift; sourceTree = "<group>"; };
 		358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDrinkEditorView.swift; sourceTree = "<group>"; };
+		3667F2CB997E9FCA1335061D /* CafadeUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CafadeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		377C07B2A3B81768D55376C2 /* EstimateInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EstimateInfoView.swift; sourceTree = "<group>"; };
+		389D8931A48E56CF0F2986B4 /* CafadeWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CafadeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		38D5163203C00D87C838FBDA /* EntryEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorSheet.swift; sourceTree = "<group>"; };
 		3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Cafade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D28C33B40445CA3EC89330B /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		4109D48D5C9AADE970DCC23A /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		418F0356BF29FC948AAF3CE3 /* DrinkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkDetailView.swift; sourceTree = "<group>"; };
+		44D8A228CD79E55A2AF1AF49 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		4DE253113CBA466B2D9D909B /* LogCaffeineFromWidgetIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCaffeineFromWidgetIntent.swift; sourceTree = "<group>"; };
 		5448B97497DA4C460CBE5FF9 /* CaffeineCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaffeineCatalog.swift; sourceTree = "<group>"; };
 		5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = RevenueCat.xcconfig; sourceTree = "<group>"; };
 		62384996BDE7C551887DEB63 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CafadeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B7BF71FEA7E95FA595E1164 /* CafadeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeUITests.swift; sourceTree = "<group>"; };
 		6F3FC017412AFB3DD06D960F /* CaffeineCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaffeineCalculator.swift; sourceTree = "<group>"; };
 		75DA331582509F0DDCDEA104 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
 		7B412727CE66E471465078C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7D2727C7488F6AF4446E6733 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7FAF567BCEBFDB5DFF9DF172 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		88AEB97DA86E370F81E5EFFC /* SleepComparisonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepComparisonView.swift; sourceTree = "<group>"; };
 		A2FE4F3C3FD74EB40FB327BD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeTests.swift; sourceTree = "<group>"; };
 		AB561C659194A24E6D93C9A6 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		ACA339BEAD042CDE4925659C /* LogCaffeineSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCaffeineSheet.swift; sourceTree = "<group>"; };
+		C8E70FB5158BE23D09A0B7F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D8ADCE4D9FFF24FA0A63848E /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		EB630B1BAFEF3015C2A8C044 /* ScreenshotFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFixture.swift; sourceTree = "<group>"; };
 		F19A7E44D85816B78CD50DBA /* EntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementService.swift; sourceTree = "<group>"; };
 		F8069566D4EADB1D3179B67E /* CafadeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeApp.swift; sourceTree = "<group>"; };
 		F97C1284FEA9EB390C34A616 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
@@ -113,22 +164,43 @@
 			children = (
 				5A591AD0F4EBE0BE36717516 /* Cafade */,
 				BDFD71AAF3D6F231F5E2B24E /* CafadeTests */,
+				C34D750FD404B8F6B75E5346 /* CafadeUITests */,
+				B79AEF2F274BB4F0AA0DC809 /* CafadeWidget */,
 				0F42F3A462D49927F003EF36 /* Config */,
 				77495C38B045CAF8776E4210 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		3EA2D0FC8F8305B5D2C412BD /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1B657E03BFB59A4D7B755698 /* CafadeWidgetStore.swift */,
+				4DE253113CBA466B2D9D909B /* LogCaffeineFromWidgetIntent.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		5A591AD0F4EBE0BE36717516 /* Cafade */ = {
 			isa = PBXGroup;
 			children = (
 				A69F2589E501A667BF511B80 /* App */,
+				5E7E0D55261E830D8A0B2DC0 /* Debug */,
 				BDE26D21E37889D54C0CC678 /* Design */,
 				AD0875D2559D42AC503FE370 /* Domain */,
 				9D94AF4CF126A5D7A6692D8A /* Features */,
 				67B23CA0871B13FDC8521B5F /* Resources */,
 				E0453FAD0AA25B93515DD268 /* Services */,
+				3EA2D0FC8F8305B5D2C412BD /* Shared */,
 			);
 			path = Cafade;
+			sourceTree = "<group>";
+		};
+		5E7E0D55261E830D8A0B2DC0 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				EB630B1BAFEF3015C2A8C044 /* ScreenshotFixture.swift */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 		6095BA920E3CB801A4972F8D /* Log */ = {
@@ -146,7 +218,9 @@
 			children = (
 				7D2727C7488F6AF4446E6733 /* Assets.xcassets */,
 				001269F794195566CA00EC40 /* Cafade.entitlements */,
+				1BD91EDD9757C1BD5FFDDEF4 /* CaffeineCatalog.json */,
 				7B412727CE66E471465078C5 /* Info.plist */,
+				7FAF567BCEBFDB5DFF9DF172 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -156,6 +230,8 @@
 			children = (
 				3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */,
 				62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */,
+				3667F2CB997E9FCA1335061D /* CafadeUITests.xctest */,
+				389D8931A48E56CF0F2986B4 /* CafadeWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -227,6 +303,17 @@
 			path = Insights;
 			sourceTree = "<group>";
 		};
+		B79AEF2F274BB4F0AA0DC809 /* CafadeWidget */ = {
+			isa = PBXGroup;
+			children = (
+				2ED3F3798B2DF5E9FFEBF8E0 /* CafadeWidget.entitlements */,
+				34B992EEB58C05AAEA48C882 /* CafadeWidget.swift */,
+				C8E70FB5158BE23D09A0B7F1 /* Info.plist */,
+				44D8A228CD79E55A2AF1AF49 /* PrivacyInfo.xcprivacy */,
+			);
+			path = CafadeWidget;
+			sourceTree = "<group>";
+		};
 		BDE26D21E37889D54C0CC678 /* Design */ = {
 			isa = PBXGroup;
 			children = (
@@ -241,6 +328,14 @@
 				A7DD8CBA43C79CBD85880512 /* CafadeTests.swift */,
 			);
 			path = CafadeTests;
+			sourceTree = "<group>";
+		};
+		C34D750FD404B8F6B75E5346 /* CafadeUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6B7BF71FEA7E95FA595E1164 /* CafadeUITests.swift */,
+			);
+			path = CafadeUITests;
 			sourceTree = "<group>";
 		};
 		C90E88D183EFF5E175928138 /* Share */ = {
@@ -279,10 +374,12 @@
 				6C2B940E087ADFE0B107004A /* Sources */,
 				CE1B59608BFC68D75A575BC2 /* Resources */,
 				1C4993BCE70C87B53865BDE7 /* Frameworks */,
+				9BAD5B6EDC4165D08C40C134 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				240BF1D9C53D3F3440CE4769 /* PBXTargetDependency */,
 			);
 			name = Cafade;
 			packageProductDependencies = (
@@ -291,6 +388,24 @@
 			productName = Cafade;
 			productReference = 3C3F2CA83CFEF66E69FE6DB6 /* Cafade.app */;
 			productType = "com.apple.product-type.application";
+		};
+		904D5CB1435143E5F82D5FC3 /* CafadeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EEF29E0A6D907B519AC04E3 /* Build configuration list for PBXNativeTarget "CafadeUITests" */;
+			buildPhases = (
+				6A50C34D3E4137ACEE22704C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1CFB3F021715A6552420353D /* PBXTargetDependency */,
+			);
+			name = CafadeUITests;
+			packageProductDependencies = (
+			);
+			productName = CafadeUITests;
+			productReference = 3667F2CB997E9FCA1335061D /* CafadeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		AB1A4FD5EAA20F4C957B945D /* CafadeTests */ = {
 			isa = PBXNativeTarget;
@@ -310,6 +425,24 @@
 			productReference = 62C626DAC1FF5F5455A21EFF /* CafadeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		B9B8484CEC91EBA47835382D /* CafadeWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0F101060826E46DFC714FA2B /* Build configuration list for PBXNativeTarget "CafadeWidgetExtension" */;
+			buildPhases = (
+				3014D743F104BF321EB41A4A /* Sources */,
+				A47E07CDED7EAFE4A8F0746B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CafadeWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = CafadeWidgetExtension;
+			productReference = 389D8931A48E56CF0F2986B4 /* CafadeWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -323,7 +456,16 @@
 						DevelopmentTeam = FKJ2A4RLF5;
 						ProvisioningStyle = Automatic;
 					};
+					904D5CB1435143E5F82D5FC3 = {
+						DevelopmentTeam = FKJ2A4RLF5;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8A298EB3E63E71A86F514B11;
+					};
 					AB1A4FD5EAA20F4C957B945D = {
+						DevelopmentTeam = FKJ2A4RLF5;
+						ProvisioningStyle = Automatic;
+					};
+					B9B8484CEC91EBA47835382D = {
 						DevelopmentTeam = FKJ2A4RLF5;
 						ProvisioningStyle = Automatic;
 					};
@@ -347,17 +489,29 @@
 			projectRoot = "";
 			targets = (
 				8A298EB3E63E71A86F514B11 /* Cafade */,
+				B9B8484CEC91EBA47835382D /* CafadeWidgetExtension */,
 				AB1A4FD5EAA20F4C957B945D /* CafadeTests */,
+				904D5CB1435143E5F82D5FC3 /* CafadeUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A47E07CDED7EAFE4A8F0746B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8536B65261ED59524269CFAF /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CE1B59608BFC68D75A575BC2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				4E875A66C1FC1567AF651EE6 /* Assets.xcassets in Resources */,
+				E7B5B6BAD6D66EB5C9A2B3B3 /* CaffeineCatalog.json in Resources */,
+				05EDA6B0877D15F09FD39B69 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +526,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3014D743F104BF321EB41A4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B19E5483CE590371D2AD46C /* CafadeWidget.swift in Sources */,
+				07F2EA330141557C6C420701 /* CafadeWidgetStore.swift in Sources */,
+				F9D9DE51E00768B00E0D59F7 /* LogCaffeineFromWidgetIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6A50C34D3E4137ACEE22704C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49B46C7D165EBF5EEB876422 /* CafadeUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6C2B940E087ADFE0B107004A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -379,6 +551,7 @@
 				F524DA56B14E01E6BDBB768E /* AppServices.swift in Sources */,
 				14B71A3B22EDA9B574A73864 /* CafadeApp.swift in Sources */,
 				286EEA8CA48A7C55B6DC4CD1 /* CafadeTheme.swift in Sources */,
+				9CDBCE52896E5617828BD6CA /* CafadeWidgetStore.swift in Sources */,
 				5583A48F300D874BBB83BC9A /* CaffeineCalculator.swift in Sources */,
 				A5F11A8F624403CBEBD38956 /* CaffeineCatalog.swift in Sources */,
 				7B642411CC60B3A782DC9898 /* CustomDrinkEditorView.swift in Sources */,
@@ -389,9 +562,11 @@
 				4526D378254E2A5D796E4802 /* HealthKitService.swift in Sources */,
 				74F626355B395607225A43E6 /* HistoryView.swift in Sources */,
 				AB601E6C9C2ED2BC1BB0DED2 /* InsightsView.swift in Sources */,
+				4C6B8C8D9EA6F7C0AA18A432 /* LogCaffeineFromWidgetIntent.swift in Sources */,
 				9E7B5AD8330846C8029C5900 /* LogCaffeineSheet.swift in Sources */,
 				83977AAFF451C928713C5556 /* Models.swift in Sources */,
 				88A352709816C09E3884A9D9 /* PaywallView.swift in Sources */,
+				9A7D04B705DC85E7ADDC6DDA /* ScreenshotFixture.swift in Sources */,
 				A9085F5E5D628BD2D4446102 /* SettingsView.swift in Sources */,
 				ADDDCD6F4BD5A0118F555333 /* ShareCardView.swift in Sources */,
 				8A310CA8761FF0CFA2A25902 /* SleepComparisonView.swift in Sources */,
@@ -402,6 +577,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1CFB3F021715A6552420353D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8A298EB3E63E71A86F514B11 /* Cafade */;
+			targetProxy = B9CF20078274FEE9390009DE /* PBXContainerItemProxy */;
+		};
+		240BF1D9C53D3F3440CE4769 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B9B8484CEC91EBA47835382D /* CafadeWidgetExtension */;
+			targetProxy = 22E275BB394AF7F4C51C8B7E /* PBXContainerItemProxy */;
+		};
 		C2BC85BFDAA088F836E15A49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8A298EB3E63E71A86F514B11 /* Cafade */;
@@ -410,6 +595,65 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0128EBE1F99B9C49A69D2175 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Cafade;
+			};
+			name = Release;
+		};
+		16C54FCC352F4BD138B3ED36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = CafadeWidget/CafadeWidget.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = CafadeWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.widget;
+				PRODUCT_NAME = CafadeWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		3CCC24D8FC726BB728CAA6EA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = CafadeWidget/CafadeWidget.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = CafadeWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.widget;
+				PRODUCT_NAME = CafadeWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		61723913E33FDC7A16BE5073 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -539,6 +783,23 @@
 			};
 			name = Release;
 		};
+		A622325F3D57C07F8BABD858 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.oneshotstar.cafade.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Cafade;
+			};
+			name = Debug;
+		};
 		D347BEA813CB729199B8426A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5958AB4078E3F59935727A4E /* RevenueCat.xcconfig */;
@@ -622,6 +883,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0F101060826E46DFC714FA2B /* Build configuration list for PBXNativeTarget "CafadeWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16C54FCC352F4BD138B3ED36 /* Debug */,
+				3CCC24D8FC726BB728CAA6EA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		207B7173358D1E38AD566BC1 /* Build configuration list for PBXProject "Cafade" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -636,6 +906,15 @@
 			buildConfigurations = (
 				D55FFC90EA0E076F19C65A2B /* Debug */,
 				D53123ECF409530D28A83A63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7EEF29E0A6D907B519AC04E3 /* Build configuration list for PBXNativeTarget "CafadeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A622325F3D57C07F8BABD858 /* Debug */,
+				0128EBE1F99B9C49A69D2175 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

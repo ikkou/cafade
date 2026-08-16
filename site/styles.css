@@ -1,15 +1,17 @@
 :root {
-  --night: #071326;
-  --night-soft: #0c1b33;
-  --paper: #f6f2e9;
-  --paper-deep: #e9e5dc;
-  --ink: #101827;
-  --muted: #687181;
-  --line: rgba(16, 24, 39, 0.16);
-  --line-dark: rgba(246, 242, 233, 0.18);
-  --saffron: #ffb43b;
-  --ice: #8ed8ff;
-  --coral: #ff7a66;
+  --night: #221b17;
+  --night-soft: #30251f;
+  --paper: #f8f3e9;
+  --paper-deep: #eee6d9;
+  --ink: #1a1714;
+  --muted: #6b625a;
+  --line: rgba(35, 27, 22, 0.14);
+  --line-dark: rgba(248, 243, 233, 0.18);
+  --saffron: #d86418;
+  --coffee: #a84312;
+  --lavender: #7469a8;
+  --ice: #596fae;
+  --coral: #b74427;
   --max: 1160px;
   --radius: 24px;
 }
@@ -51,16 +53,17 @@ a {
 }
 
 .site-header.dark {
-  color: var(--paper);
+  color: var(--ink);
 }
 
 .brand {
   align-items: center;
   display: inline-flex;
   font-size: 18px;
-  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
   gap: 10px;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   text-decoration: none;
 }
 
@@ -91,33 +94,38 @@ a {
 }
 
 .hero {
-  background: var(--night);
-  color: var(--paper);
+  background:
+    radial-gradient(circle at 78% 38%, rgba(216, 100, 24, 0.14), transparent 28%),
+    radial-gradient(circle at 70% 70%, rgba(116, 105, 168, 0.13), transparent 24%),
+    var(--paper);
+  color: var(--ink);
   min-height: 720px;
   overflow: hidden;
 }
 
 .hero-inner {
-  align-items: center;
+  align-items: start;
   display: grid;
-  gap: 72px;
-  grid-template-columns: minmax(0, 0.88fr) minmax(420px, 1.12fr);
+  gap: 48px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
   margin: 0 auto;
   max-width: var(--max);
-  padding: 94px 28px 116px;
+  padding: 70px 28px 92px;
 }
 
 .hero-copy h1 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(58px, 8vw, 112px);
-  font-weight: 650;
-  letter-spacing: -0.085em;
-  line-height: 0.92;
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  line-height: 0.94;
   margin: 0;
   max-width: 650px;
 }
 
 .hero-copy h1 span {
-  color: var(--saffron);
+  color: var(--coffee);
+  white-space: nowrap;
 }
 
 .hero-copy p {
@@ -125,7 +133,7 @@ a {
 }
 
 .hero-lede {
-  color: rgba(246, 242, 233, 0.72);
+  color: var(--muted);
   font-size: 19px;
   margin: 36px 0 0;
 }
@@ -140,10 +148,10 @@ a {
 
 .button {
   align-items: center;
-  background: var(--saffron);
-  border: 1px solid var(--saffron);
+  background: var(--ink);
+  border: 1px solid var(--ink);
   border-radius: 999px;
-  color: var(--night);
+  color: var(--paper);
   display: inline-flex;
   font-size: 14px;
   font-weight: 700;
@@ -156,24 +164,24 @@ a {
 
 .button:hover,
 .button:focus-visible {
-  background: #ffc766;
-  border-color: #ffc766;
+  background: var(--coffee);
+  border-color: var(--coffee);
   transform: translateY(-1px);
 }
 
 .button.quiet {
   background: transparent;
-  border-color: rgba(246, 242, 233, 0.32);
-  color: var(--paper);
+  border-color: rgba(26, 23, 20, 0.28);
+  color: var(--ink);
 }
 
 .button.quiet:hover,
 .button.quiet:focus-visible {
-  border-color: var(--paper);
+  border-color: var(--ink);
 }
 
 .hero-note {
-  color: rgba(246, 242, 233, 0.48);
+  color: var(--muted);
   font-size: 12px;
   margin: 22px 0 0;
 }
@@ -184,7 +192,7 @@ a {
 }
 
 .hero-visual::before {
-  border: 1px solid rgba(142, 216, 255, 0.18);
+  border: 1px solid rgba(168, 67, 18, 0.18);
   border-radius: 50%;
   content: "";
   height: 480px;
@@ -195,8 +203,9 @@ a {
 }
 
 .hero-visual img {
-  border: 1px solid rgba(246, 242, 233, 0.14);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(35, 27, 22, 0.12);
+  border-radius: 27%;
+  box-shadow: 0 28px 90px rgba(69, 41, 26, 0.18);
   position: relative;
   width: 100%;
 }
@@ -223,9 +232,10 @@ a {
 }
 
 .section h2 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(42px, 5vw, 76px);
-  font-weight: 600;
-  letter-spacing: -0.075em;
+  font-weight: 400;
+  letter-spacing: -0.06em;
   line-height: 0.98;
   margin: 0;
   max-width: 700px;
@@ -253,9 +263,10 @@ a {
 }
 
 .feature-row h3 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(22px, 2.5vw, 34px);
-  font-weight: 550;
-  letter-spacing: -0.05em;
+  font-weight: 400;
+  letter-spacing: -0.04em;
   margin: 0;
 }
 
@@ -274,23 +285,25 @@ a {
 }
 
 .dark-section {
-  background: var(--night-soft);
-  color: var(--paper);
+  background:
+    radial-gradient(circle at 10% 30%, rgba(116, 105, 168, 0.12), transparent 28%),
+    var(--paper-deep);
+  color: var(--ink);
 }
 
 .dark-section .section-intro p,
 .dark-section .feature-row p {
-  color: rgba(246, 242, 233, 0.64);
+  color: var(--muted);
 }
 
 .dark-section .feature-list,
 .dark-section .feature-row {
-  border-color: var(--line-dark);
+  border-color: var(--line);
 }
 
 .dark-section .section-number,
 .dark-section .feature-index {
-  color: var(--ice);
+  color: var(--lavender);
 }
 
 .closing {
@@ -331,8 +344,11 @@ a {
 }
 
 .page-hero {
-  background: var(--night);
-  color: var(--paper);
+  background:
+    radial-gradient(circle at 76% 36%, rgba(216, 100, 24, 0.14), transparent 24%),
+    radial-gradient(circle at 20% 74%, rgba(116, 105, 168, 0.10), transparent 24%),
+    var(--paper-deep);
+  color: var(--ink);
   padding: 78px 28px 92px;
 }
 
@@ -343,15 +359,16 @@ a {
 }
 
 .page-hero h1 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(52px, 8vw, 92px);
-  font-weight: 620;
-  letter-spacing: -0.08em;
+  font-weight: 400;
+  letter-spacing: -0.065em;
   line-height: 0.94;
   margin: 0;
 }
 
 .page-hero p {
-  color: rgba(246, 242, 233, 0.68);
+  color: var(--muted);
   font-size: 18px;
   margin: 28px 0 0;
   max-width: 600px;
@@ -368,6 +385,7 @@ a {
 }
 
 .legal-content h2 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 28px;
   letter-spacing: -0.045em;
   line-height: 1.1;
@@ -375,6 +393,7 @@ a {
 }
 
 .legal-content h3 {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 19px;
   letter-spacing: -0.025em;
   margin: 32px 0 8px;
@@ -382,7 +401,7 @@ a {
 
 .legal-content p,
 .legal-content li {
-  color: #4d5665;
+  color: #594f47;
   max-width: 720px;
 }
 
@@ -391,7 +410,7 @@ a {
 }
 
 .legal-content a {
-  color: #19577d;
+  color: var(--coffee);
   text-underline-offset: 3px;
 }
 
@@ -409,7 +428,7 @@ a {
 }
 
 .contact-block a {
-  color: var(--saffron);
+  color: #ffc083;
   font-weight: 700;
 }
 
@@ -437,6 +456,10 @@ a {
     gap: 54px;
     grid-template-columns: 1fr;
     padding: 76px 20px 86px;
+  }
+
+  .hero-copy h1 span {
+    white-space: normal;
   }
 
   .hero {

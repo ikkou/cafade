@@ -11,13 +11,15 @@ enum CafadePalette {
     static let mist = Color(red: 0.40, green: 0.38, blue: 0.35)
     static let saffron = Color(red: 0.91, green: 0.43, blue: 0.12)
     static let coffee = Color(red: 0.72, green: 0.29, blue: 0.055)
+    static let accentText = coffee
     static let coffeeLight = Color(red: 1.00, green: 0.67, blue: 0.29)
     static let coffeeGlow = Color(red: 1.00, green: 0.82, blue: 0.55)
     static let buttonInk = Color(red: 0.20, green: 0.15, blue: 0.12)
     static let plumShadow = Color(red: 0.34, green: 0.30, blue: 0.56)
     static let mint = Color(red: 0.22, green: 0.47, blue: 0.30)
     static let sky = Color(red: 0.28, green: 0.40, blue: 0.70)
-    static let coral = Color(red: 0.83, green: 0.26, blue: 0.12)
+    // Dark enough for caption-sized warning text on the warm paper surface.
+    static let coral = Color(red: 0.80, green: 0.24, blue: 0.10)
     static let lavender = Color(red: 0.46, green: 0.39, blue: 0.67)
     static let line = ink.opacity(0.12)
 
@@ -44,14 +46,7 @@ struct CafadeBackground: View {
                 .fill(CafadePalette.lavender.opacity(0.11))
                 .frame(width: 380, height: 380)
                 .blur(radius: 96)
-                .offset(x: -178, y: 320)
-            LinearGradient(
-                colors: [.clear, CafadePalette.background.opacity(0.92)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 132)
-            .frame(maxHeight: .infinity, alignment: .bottom)
+                .offset(x: -178, y: 120)
         }
         .ignoresSafeArea()
     }
@@ -69,29 +64,21 @@ struct CafadeGlassCard<Content: View>: View {
     var body: some View {
         content
             .padding(18)
-            .background(CafadePalette.surface.opacity(0.84), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(CafadePalette.surface.opacity(0.94))
+                    .overlay {
+                        if let tint {
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .fill(tint)
+                        }
+                    }
+            }
             .overlay {
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .stroke(CafadePalette.line, lineWidth: 1)
             }
             .shadow(color: CafadePalette.ink.opacity(0.055), radius: 16, y: 8)
-            .modifier(CafadeGlassModifier(tint: tint))
-    }
-}
-
-private struct CafadeGlassModifier: ViewModifier {
-    let tint: Color?
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.glassEffect(
-                .regular.tint((tint ?? CafadePalette.surface).opacity(0.34)),
-                in: .rect(cornerRadius: 22)
-            )
-        } else {
-            content.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        }
     }
 }
 
@@ -105,9 +92,9 @@ struct CafadeSectionLabel: View {
             Text(eyebrow.uppercased())
                 .font(.caption2.weight(.semibold))
                 .tracking(1.8)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text(title)
-                .font(.system(size: 24, weight: .regular, design: .serif))
+                .font(.system(.title2, design: .serif).weight(.regular))
                 .foregroundStyle(CafadePalette.ink)
             if let detail {
                 Text(detail)
@@ -135,13 +122,17 @@ struct CafadePill: View {
 
 struct CafadeCaffeineOrb: View {
     let estimate: CaffeineEstimate
+    var isActive = true
+    var maxOrbWidth: CGFloat = 318
+    var maxOrbHeight: CGFloat = 160
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @State private var motionPhase: CGFloat = 0
 
     var body: some View {
         GeometryReader { proxy in
-            let orbWidth = min(proxy.size.width * 0.88, 318)
-            let orbHeight = min(proxy.size.height * 0.90, 160)
+            let orbWidth = min(proxy.size.width * 0.88, maxOrbWidth)
+            let orbHeight = min(proxy.size.height * 0.90, maxOrbHeight)
 
             ZStack {
                 CafadeLiquidOrbShape(phase: motionPhase + 0.08)
@@ -248,9 +239,9 @@ struct CafadeCaffeineOrb: View {
             .opacity(estimate.typicalMg > 0 ? 0.92 : 0.48)
         }
         .accessibilityHidden(true)
-        .task(id: "\(estimate.typicalMg)-\(reduceMotion)") {
+        .task(id: "\(estimate.typicalMg > 0)-\(reduceMotion)-\(scenePhase == .active)-\(isActive)") {
             motionPhase = 0
-            guard !reduceMotion, estimate.typicalMg > 0 else { return }
+            guard isActive, !reduceMotion, estimate.typicalMg > 0, scenePhase == .active else { return }
             withAnimation(.easeInOut(duration: 3.8).repeatForever(autoreverses: true)) {
                 motionPhase = 1
             }
@@ -387,20 +378,53 @@ struct CafadeSecondaryButtonStyle: ButtonStyle {
 struct CaffeineValueLabel: View {
     let estimate: CaffeineEstimate
     var size: CGFloat = 54
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(alignment: .lastTextBaseline, spacing: 7) {
-            Text(estimate.shortDisplayText)
-                .font(.system(size: size, weight: .regular, design: .serif))
-                .monospacedDigit()
-                .foregroundStyle(CafadePalette.ink)
-            Text("mg")
-                .font(.system(size: size * 0.34, weight: .medium, design: .serif))
-                .foregroundStyle(CafadePalette.saffron)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                ViewThatFits(in: .horizontal) {
+                    valueRow(usesSemanticFonts: true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        valueText(usesSemanticFonts: true)
+                        unitText(usesSemanticFonts: true)
+                    }
+                }
+            } else {
+                valueRow(usesSemanticFonts: false)
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Estimated caffeine remaining")
         .accessibilityValue(estimate.displayText)
+    }
+
+    private func valueRow(usesSemanticFonts: Bool) -> some View {
+        HStack(alignment: .lastTextBaseline, spacing: 7) {
+            valueText(usesSemanticFonts: usesSemanticFonts)
+            unitText(usesSemanticFonts: usesSemanticFonts)
+        }
+    }
+
+    private func valueText(usesSemanticFonts: Bool) -> some View {
+        Text(estimate.shortDisplayText)
+            .font(
+                usesSemanticFonts
+                    ? .system(.largeTitle, design: .serif).weight(.regular)
+                    : .system(size: size, weight: .regular, design: .serif)
+            )
+            .monospacedDigit()
+            .foregroundStyle(CafadePalette.ink)
+    }
+
+    private func unitText(usesSemanticFonts: Bool) -> some View {
+        Text("mg")
+            .font(
+                usesSemanticFonts
+                    ? .headline
+                    : .system(size: size * 0.34, weight: .medium, design: .serif)
+            )
+            .foregroundStyle(CafadePalette.accentText)
     }
 }
 
@@ -418,6 +442,15 @@ struct CaffeineCurveView: View {
         )
         let timelineStart = now.addingTimeInterval(-12 * 3600)
         let timelineDuration = 24 * 3600.0
+        let markerInterval = DateInterval(
+            start: timelineStart,
+            end: now.addingTimeInterval(12 * 3600)
+        )
+        let markers = CaffeineCalculator.curveMarkers(
+            events: events,
+            in: markerInterval,
+            halfLifeHours: halfLifeHours
+        )
 
         VStack(spacing: 10) {
             Canvas { context, size in
@@ -491,16 +524,11 @@ struct CaffeineCurveView: View {
                     with: .color(CafadePalette.saffron)
                 )
 
-                for event in events where timelineStart <= event.consumedAt && event.consumedAt <= now.addingTimeInterval(12 * 3600) {
-                    let progress = event.consumedAt.timeIntervalSince(timelineStart) / timelineDuration
-                    let markerEstimate = CaffeineCalculator.estimate(
-                        events: events,
-                        at: event.consumedAt,
-                        halfLifeHours: halfLifeHours
-                    )
+                for marker in markers {
+                    let progress = marker.date.timeIntervalSince(timelineStart) / timelineDuration
                     let markerPoint = CGPoint(
                         x: size.width * min(max(progress, 0), 1),
-                        y: size.height - size.height * CGFloat(markerEstimate.typicalMg / yMax)
+                        y: size.height - size.height * CGFloat(marker.estimate.typicalMg / yMax)
                     )
                     context.stroke(
                         Path { path in
@@ -528,7 +556,7 @@ struct CaffeineCurveView: View {
                 Text("12h ago")
                 Spacer()
                 Text("Now")
-                    .foregroundStyle(CafadePalette.saffron)
+                    .foregroundStyle(CafadePalette.accentText)
                 Spacer()
                 Text("in 12h")
             }
@@ -538,7 +566,7 @@ struct CaffeineCurveView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Caffeine fade curve for the last and next twelve hours")
         .accessibilityValue(
-            "\(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText), \(events.count) logged drinks"
+            "\(CaffeineCalculator.estimate(events: events, at: now, halfLifeHours: halfLifeHours).displayText), \(markers.count) intake\(markers.count == 1 ? "" : "s") shown"
         )
     }
 
@@ -593,7 +621,7 @@ struct CafadeEmptyState: View {
         VStack(spacing: 12) {
             Image(systemName: symbol)
                 .font(.system(size: 30, weight: .light))
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text(title)
                 .font(.headline)
                 .foregroundStyle(CafadePalette.ink)

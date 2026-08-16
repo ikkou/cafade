@@ -15,9 +15,29 @@ The product promise is:
 - `site/support/`: support information.
 - `site/privacy/`: privacy policy.
 - `site/terms/`: app terms and Apple subscription links.
+- `app/Cafade/Resources/CaffeineCatalog.json`: versioned US drink catalog.
+- `app/Cafade/Resources/PrivacyInfo.xcprivacy`: app privacy manifest.
 
 The iOS source lives under `app/`. The app is generated from `app/project.yml` with XcodeGen.
 The catalog and calculation layers are kept separate from SwiftUI screens so US and future market data can be added without changing the model or paywall flow.
+
+Each active catalog item must include a stable identifier, market code,
+verified caffeine value or range, source URL, and verification date. Add or
+update products in the JSON file; do not hard-code product rows in SwiftUI.
+
+## Local verification
+
+Regenerate the Xcode project after changing `app/project.yml`:
+
+```text
+cd app
+xcodegen generate
+```
+
+The `Cafade` scheme runs calculation/persistence tests and UI tests. The UI
+suite verifies the Settings shortcut/tab state, the one-tap Suggested logging
+path with Undo, access to the estimate explanation, and share-card saving to
+Photos.
 
 ## Website
 
@@ -61,3 +81,7 @@ REVENUECAT_API_KEY = your_public_sdk_key
 
 The local file is ignored by Git. The app remains usable without it; purchase
 and restore become active after the RevenueCat offering is connected.
+
+Loading plans in a development build does not complete commerce verification.
+Purchase, cancellation, renewal, expiry, billing retry, and restore must still
+be exercised with Apple Sandbox or TestFlight before submission.

@@ -1,27 +1,40 @@
 import SwiftData
+import StoreKit
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
+
+private enum SettingsDestination: Hashable {
+    case estimateInfo
+}
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var services
     @EnvironmentObject private var entitlements: EntitlementService
+    @Environment(\.openURL) private var openURL
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Query private var settings: [UserSettings]
-    @Query private var events: [IntakeEvent]
 
     @State private var showingTargetEditor = false
     @State private var showingPaywall = false
-    @State private var showingHealthError = false
     @State private var showingDeleteConfirmation = false
-    @State private var healthErrorMessage = ""
+    @State private var message: String?
+    @State private var isWorking = false
     @State private var isExporting = false
     @State private var exportDocument = CafadeExportDocument()
+    @State private var navigationPath: [SettingsDestination] = {
+        #if DEBUG
+        ScreenshotFixture.initiallyShowsModelExplanation ? [.estimateInfo] : []
+        #else
+        []
+        #endif
+    }()
 
     private var activeSettings: UserSettings? { settings.first }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 CafadeBackground()
                 ScrollView {
@@ -42,22 +55,32 @@ struct SettingsView: View {
                 .scrollIndicators(.hidden)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .accessibilityHidden(showingTargetEditor || showingPaywall || isExporting)
             .sheet(isPresented: $showingTargetEditor) {
-                DailyTargetSheet(settings: activeSettings ?? AppServices.ensureSettings(in: modelContext))
+                if let activeSettings {
+                    DailyTargetSheet(settings: activeSettings)
+                } else {
+                    ContentUnavailableView("Settings unavailable", systemImage: "exclamationmark.triangle")
+                }
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView()
                     .environmentObject(entitlements)
             }
-            .alert("Apple Health", isPresented: $showingHealthError) {
-                Button("OK", role: .cancel) { }
+            .alert(
+                "Cafade",
+                isPresented: Binding(
+                    get: { message != nil },
+                    set: { if !$0 { message = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { message = nil }
             } message: {
-                Text(healthErrorMessage)
+                Text(message ?? "")
             }
             .confirmationDialog("Delete all Cafade data?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete all data", role: .destructive) {
-                    let current = activeSettings ?? AppServices.ensureSettings(in: modelContext)
-                    services.deleteAll(events: events, context: modelContext, settings: current)
+                    Task { await deleteAllData() }
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
@@ -68,9 +91,23 @@ struct SettingsView: View {
                 document: exportDocument,
                 contentType: .json,
                 defaultFilename: "cafade-export"
-            ) { _ in }
+            ) { result in
+                if case .failure(let error) = result {
+                    message = "The export could not be saved. \(error.localizedDescription)"
+                }
+            }
             .task {
-                _ = AppServices.ensureSettings(in: modelContext)
+                do {
+                    _ = try AppServices.ensureSettings(in: modelContext)
+                } catch {
+                    message = error.localizedDescription
+                }
+            }
+            .navigationDestination(for: SettingsDestination.self) { destination in
+                switch destination {
+                case .estimateInfo:
+                    EstimateInfoView()
+                }
             }
         }
     }
@@ -80,9 +117,9 @@ struct SettingsView: View {
             Text("YOUR SETUP")
                 .font(.caption.weight(.semibold))
                 .tracking(1.8)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text("Settings")
-                .font(.system(size: 38, weight: .medium, design: .serif))
+                .font(.system(.largeTitle, design: .serif).weight(.medium))
                 .foregroundStyle(CafadePalette.paper)
             Text("Tune the estimate to the way you actually use Cafade.")
                 .font(.subheadline)
@@ -95,7 +132,7 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 SettingsRow(title: "Half-life", detail: "How quickly the estimate fades", symbol: "waveform.path") {
                     Menu {
-                        ForEach([2, 4, 6, 8], id: \.self) { hours in
+                        ForEach(UserSettings.supportedHalfLifeHours, id: \.self) { hours in
                             Button {
                                 activeSettings?.halfLifeHours = hours
                                 saveSettings()
@@ -110,16 +147,17 @@ struct SettingsView: View {
                     } label: {
                         Text("\(activeSettings?.halfLifeHours ?? 4) hours")
                             .font(.subheadline.monospacedDigit().weight(.semibold))
-                            .foregroundStyle(CafadePalette.saffron)
+                            .foregroundStyle(CafadePalette.accentText)
                     }
+                    .accessibilityLabel("Caffeine half-life")
+                    .accessibilityValue("\(activeSettings?.halfLifeHours ?? 4) hours")
                 }
                 Divider().overlay(CafadePalette.line)
-                NavigationLink {
-                    EstimateInfoView()
-                } label: {
+                NavigationLink(value: SettingsDestination.estimateInfo) {
                     SettingsRowLabel(title: "How the model works", detail: "Read the simple half-life explanation", symbol: "questionmark.circle")
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("settings.modelExplanation")
             }
         }
     }
@@ -138,22 +176,16 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 Divider().overlay(CafadePalette.line)
-                HStack(spacing: 13) {
-                    Image(systemName: "moon.stars")
-                        .foregroundStyle(CafadePalette.lavender)
-                        .frame(width: 24)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Typical bedtime")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(CafadePalette.paper)
-                        Text(activeSettings?.bedtimeDate.map { $0.formatted(date: .omitted, time: .shortened) } ?? "Not set")
-                            .font(.caption)
-                            .foregroundStyle(CafadePalette.mist)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 13) {
+                        bedtimeLabel
+                        Spacer()
+                        bedtimePicker
                     }
-                    Spacer()
-                    DatePicker("Typical bedtime", selection: bedtimeBinding, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
-                        .tint(CafadePalette.saffron)
+                    VStack(alignment: .leading, spacing: 10) {
+                        bedtimeLabel
+                        bedtimePicker
+                    }
                 }
                 .padding(.vertical, 14)
             }
@@ -166,6 +198,7 @@ struct SettingsView: View {
                 HStack(spacing: 13) {
                     Image(systemName: "heart.text.square")
                         .font(.title3)
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .foregroundStyle(CafadePalette.coral)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Apple Health")
@@ -176,23 +209,55 @@ struct SettingsView: View {
                             .foregroundStyle(CafadePalette.mist)
                     }
                     Spacer()
-                    if services.healthKit.isWriteAuthorized || (!services.healthKit.isWriteDenied && activeSettings?.healthKitWriteEnabled == true) {
+                    if isHealthSyncEnabled {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(CafadePalette.mint)
                     } else if services.healthKit.isWriteDenied {
                         Image(systemName: "exclamationmark.circle")
                             .foregroundStyle(CafadePalette.coral)
+                    } else if services.healthKit.isWriteAuthorized {
+                        Image(systemName: "pause.circle")
+                            .foregroundStyle(CafadePalette.mist)
                     }
                 }
-                Text("Cafade writes only the entries you choose to save. It does not read sleep data in this release. If you previously denied access, re-enable Dietary Caffeine in the Health app before reconnecting.")
+                Text("Cafade writes only the entries you choose to save. It does not read sleep data in this release. Pausing keeps existing Health samples in place. If you previously denied access, re-enable Dietary Caffeine in the Health app before reconnecting.")
                     .font(.caption)
                     .foregroundStyle(CafadePalette.mist)
                 Button {
-                    Task { await connectHealthKit() }
+                    if services.healthKit.isWriteDenied {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    } else {
+                        Task { await connectHealthKit() }
+                    }
                 } label: {
-                    Text(activeSettings?.healthKitWriteEnabled == true ? "Reconnect Apple Health" : "Connect Apple Health")
+                    Text(healthActionTitle)
                 }
                 .buttonStyle(CafadeSecondaryButtonStyle())
+                .disabled(isWorking)
+
+                if isHealthSyncEnabled {
+                    Button("Stop saving new entries") {
+                        pauseHealthKitWrites()
+                    }
+                    .buttonStyle(CafadeSecondaryButtonStyle())
+                    .disabled(isWorking)
+                }
+
+                if services.hasPendingHealthCleanup {
+                    Divider().overlay(CafadePalette.line)
+                    VStack(alignment: .leading, spacing: 9) {
+                        Text("Apple Health cleanup is pending for one or more deleted Cafade entries.")
+                            .font(.caption)
+                            .foregroundStyle(CafadePalette.mist)
+                        Button("Retry Health cleanup") {
+                            Task { await retryHealthCleanup() }
+                        }
+                        .buttonStyle(CafadeSecondaryButtonStyle())
+                        .disabled(isWorking)
+                    }
+                }
             }
         }
     }
@@ -200,14 +265,7 @@ struct SettingsView: View {
     private var appearanceSection: some View {
         settingsGroup(title: "APPEARANCE") {
             VStack(spacing: 0) {
-                HStack(spacing: 13) {
-                    Image(systemName: "ruler")
-                        .foregroundStyle(CafadePalette.mint)
-                        .frame(width: 24)
-                    Text("Units")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(CafadePalette.paper)
-                    Spacer()
+                SettingsRow(title: "Units", detail: "Volume shown throughout the app", symbol: "ruler") {
                     Menu {
                         ForEach(UnitSystem.allCases) { unit in
                             Button {
@@ -223,22 +281,27 @@ struct SettingsView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Text(activeSettings?.unitSystem.title ?? UnitSystem.usCustomary.title)
-                                .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
-                                .minimumScaleFactor(0.82)
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.caption2.weight(.bold))
                         }
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(CafadePalette.saffron)
+                        .foregroundStyle(CafadePalette.accentText)
                     }
                     .accessibilityLabel("Units")
+                    .accessibilityValue(activeSettings?.unitSystem.title ?? UnitSystem.usCustomary.title)
                 }
-                .padding(.vertical, 14)
                 Divider().overlay(CafadePalette.line)
-                SettingsRow(title: "Reduce motion", detail: systemReduceMotion ? "On in Accessibility" : "Off in Accessibility", symbol: "figure.walk.motion") {
-                    Image(systemName: systemReduceMotion ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(systemReduceMotion ? CafadePalette.mint : CafadePalette.mist)
+                SettingsRow(
+                    title: "Reduce motion",
+                    detail: systemReduceMotion ? "On · iPhone Settings > Accessibility > Motion" : "Off · iPhone Settings > Accessibility > Motion",
+                    symbol: "figure.walk.motion"
+                ) {
+                    Link(destination: URL(string: "https://support.apple.com/en-us/guide/iphone/reduce-screen-motion-iph0b691d3ed/ios")!) {
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(CafadePalette.sky)
+                    }
+                    .accessibilityLabel("Learn how to change Reduce Motion in iPhone Settings")
                 }
             }
         }
@@ -247,10 +310,16 @@ struct SettingsView: View {
     private var subscriptionSection: some View {
         settingsGroup(title: "SUBSCRIPTION") {
             VStack(spacing: 0) {
-                Button { showingPaywall = true } label: {
+                Button {
+                    if entitlements.isPro {
+                        Task { await showSubscriptionManagement() }
+                    } else {
+                        showingPaywall = true
+                    }
+                } label: {
                     SettingsRowLabel(
                         title: "Cafade Pro",
-                        detail: entitlements.isPro ? "Active" : "Longer history and patterns",
+                        detail: entitlements.isPro ? "Active · Manage subscription" : "Longer history and patterns",
                         symbol: "sparkles"
                     )
                 }
@@ -262,6 +331,7 @@ struct SettingsView: View {
                     SettingsRowLabel(title: "Restore purchases", detail: "Check your App Store subscription", symbol: "arrow.clockwise")
                 }
                 .buttonStyle(.plain)
+                .disabled(entitlements.state.isBusy)
                 if let message = entitlements.lastMessage {
                     Text(message)
                         .font(.caption)
@@ -285,7 +355,7 @@ struct SettingsView: View {
                 }
                 Divider().overlay(CafadePalette.line)
                 Link(destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!) {
-                    SettingsRowLabel(title: "Terms", detail: "Apple standard terms of use", symbol: "doc.text")
+                    SettingsRowLabel(title: "Apple Standard EULA", detail: "Terms used for Cafade subscriptions", symbol: "doc.text")
                 }
             }
         }
@@ -295,18 +365,19 @@ struct SettingsView: View {
         settingsGroup(title: "YOUR DATA") {
             VStack(spacing: 0) {
                 Button {
-                    exportDocument = CafadeExportDocument(events: events, settings: activeSettings ?? UserSettings())
-                    isExporting = true
+                    prepareExport()
                 } label: {
                     SettingsRowLabel(title: "Export data", detail: "Save a readable JSON copy", symbol: "square.and.arrow.up")
                 }
                 .buttonStyle(.plain)
+                .disabled(isWorking)
                 Divider().overlay(CafadePalette.line)
                 Button(role: .destructive) { showingDeleteConfirmation = true } label: {
                     SettingsRowLabel(title: "Delete all data", detail: "Remove the local log and Cafade Health samples", symbol: "trash")
                         .foregroundStyle(CafadePalette.coral)
                 }
                 .buttonStyle(.plain)
+                .disabled(isWorking)
             }
         }
     }
@@ -316,7 +387,7 @@ struct SettingsView: View {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .tracking(1.5)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             CafadeGlassCard { content() }
         }
     }
@@ -332,16 +403,30 @@ struct SettingsView: View {
     }
 
     private var healthStatusText: String {
-        if services.healthKit.isWriteAuthorized {
+        if isHealthSyncEnabled {
             return "Connected for Dietary Caffeine"
         }
         if services.healthKit.isWriteDenied {
             return "Access is off in Apple Health"
         }
+        if services.healthKit.isWriteAuthorized {
+            return "Permission allowed · saving is paused"
+        }
         if activeSettings?.healthKitWriteEnabled == true {
-            return "Connected for Dietary Caffeine"
+            return "Reconnect to confirm Apple Health access"
         }
         return "Not connected"
+    }
+
+    private var isHealthSyncEnabled: Bool {
+        services.healthKit.isWriteAuthorized && activeSettings?.healthKitWriteEnabled == true
+    }
+
+    private var healthActionTitle: String {
+        if isHealthSyncEnabled { return "Sync saved entries" }
+        if services.healthKit.isWriteDenied { return "Open iPhone Settings" }
+        if services.healthKit.isWriteAuthorized { return "Resume Apple Health" }
+        return "Connect Apple Health"
     }
 
     private var bedtimeBinding: Binding<Date> {
@@ -359,17 +444,122 @@ struct SettingsView: View {
         )
     }
 
+    private var bedtimeLabel: some View {
+        HStack(spacing: 13) {
+            Image(systemName: "moon.stars")
+                .font(.body)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .foregroundStyle(CafadePalette.lavender)
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Typical bedtime")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(CafadePalette.paper)
+                Text(activeSettings?.bedtimeDate.map(CaffeineFormatter.time) ?? "Not set")
+                    .font(.caption)
+                    .foregroundStyle(CafadePalette.mist)
+            }
+        }
+    }
+
+    private var bedtimePicker: some View {
+        DatePicker("Typical bedtime", selection: bedtimeBinding, displayedComponents: .hourAndMinute)
+            .labelsHidden()
+            .tint(CafadePalette.accentText)
+    }
+
     private func saveSettings() {
-        try? modelContext.save()
+        do {
+            try AppServices.saveSettings(in: modelContext)
+        } catch {
+            message = error.localizedDescription
+        }
     }
 
     private func connectHealthKit() async {
-        let current = activeSettings ?? AppServices.ensureSettings(in: modelContext)
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
         do {
+            let current = try (activeSettings ?? AppServices.ensureSettings(in: modelContext))
+            let events = try fetchAllEvents()
             try await services.requestHealthKitAndSync(events: events, settings: current, context: modelContext)
+            message = "Apple Health is connected. Your saved Cafade entries have been synced."
         } catch {
-            healthErrorMessage = error.localizedDescription
-            showingHealthError = true
+            message = error.localizedDescription
+        }
+    }
+
+    private func pauseHealthKitWrites() {
+        guard let activeSettings else { return }
+        activeSettings.healthKitWriteEnabled = false
+        do {
+            try AppServices.saveSettings(in: modelContext)
+            message = "New entries will stay in Cafade only. Existing Apple Health samples were not removed."
+        } catch {
+            message = error.localizedDescription
+        }
+    }
+
+    private func retryHealthCleanup() async {
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
+        if let warning = await services.retryPendingHealthCleanup() {
+            message = warning
+        } else {
+            message = "Apple Health cleanup is complete."
+        }
+    }
+
+    private func deleteAllData() async {
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let current = try (activeSettings ?? AppServices.ensureSettings(in: modelContext))
+            let events = try fetchAllEvents()
+            let outcome = try await services.deleteAll(
+                events: events,
+                context: modelContext,
+                settings: current
+            )
+            message = outcome.healthWarning ?? "All local Cafade data was deleted."
+        } catch {
+            message = error.localizedDescription
+        }
+    }
+
+    private func prepareExport() {
+        do {
+            let current = try (activeSettings ?? AppServices.ensureSettings(in: modelContext))
+            exportDocument = try CafadeExportDocument(events: fetchAllEvents(), settings: current)
+            isExporting = true
+        } catch {
+            message = "Cafade could not prepare the export. \(error.localizedDescription)"
+        }
+    }
+
+    private func fetchAllEvents() throws -> [IntakeEvent] {
+        let descriptor = FetchDescriptor<IntakeEvent>(
+            sortBy: [SortDescriptor(\IntakeEvent.consumedAt, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    private func showSubscriptionManagement() async {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive })
+        else {
+            message = "Subscription management is not available right now. Please try again."
+            return
+        }
+        do {
+            try await AppStore.showManageSubscriptions(in: scene)
+            _ = await entitlements.refreshCustomerInfo()
+        } catch {
+            message = "The App Store subscription screen could not be opened. \(error.localizedDescription)"
         }
     }
 }
@@ -379,6 +569,7 @@ private struct SettingsRow<Accessory: View>: View {
     let detail: String
     let symbol: String
     let accessory: () -> Accessory
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(title: String, detail: String, symbol: String, @ViewBuilder accessory: @escaping () -> Accessory) {
         self.title = title
@@ -388,10 +579,32 @@ private struct SettingsRow<Accessory: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 13) {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 10) {
+                    rowLabel
+                    accessory()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                HStack(spacing: 13) {
+                    rowLabel
+                    Spacer()
+                    accessory()
+                }
+            }
+        }
+        .padding(.vertical, 14)
+    }
+
+    private var rowLabel: some View {
+        HStack(alignment: .top, spacing: 13) {
             Image(systemName: symbol)
+                .font(.body)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .foregroundStyle(CafadePalette.mint)
-                .frame(width: 24)
+                .frame(width: 32)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.subheadline.weight(.medium))
@@ -400,10 +613,7 @@ private struct SettingsRow<Accessory: View>: View {
                     .font(.caption)
                     .foregroundStyle(CafadePalette.mist)
             }
-            Spacer()
-            accessory()
         }
-        .padding(.vertical, 14)
     }
 }
 
@@ -413,10 +623,12 @@ private struct SettingsRowLabel: View {
     let symbol: String
 
     var body: some View {
-        HStack(spacing: 13) {
+        HStack(alignment: .top, spacing: 13) {
             Image(systemName: symbol)
+                .font(.body)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .foregroundStyle(CafadePalette.mint)
-                .frame(width: 24)
+                .frame(width: 32)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.subheadline.weight(.medium))
@@ -428,9 +640,15 @@ private struct SettingsRowLabel: View {
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.bold))
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .foregroundStyle(CafadePalette.mist)
+                .padding(.top, 3)
         }
         .padding(.vertical, 14)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(detail)
     }
 }
 
@@ -439,46 +657,55 @@ struct DailyTargetSheet: View {
     @Environment(\.modelContext) private var modelContext
     let settings: UserSettings
     @State private var targetText: String
+    @State private var errorMessage: String?
     @FocusState private var isTargetFocused: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(settings: UserSettings) {
         self.settings = settings
         _targetText = State(initialValue: settings.dailyTargetMg.map(String.init) ?? "")
     }
 
+    private var targetMg: Int? {
+        guard let value = Int(targetText),
+              (CaffeineCalculator.customEntryMinimumMg...CaffeineCalculator.customEntryMaximumMg).contains(value)
+        else { return nil }
+        return value
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 CafadeBackground()
-                VStack(alignment: .leading, spacing: 22) {
-                    Text("A personal comparison point, not a safety limit.")
-                        .font(.subheadline)
-                        .foregroundStyle(CafadePalette.mist)
-                    HStack {
-                        TextField("e.g. 200", text: $targetText)
-                            .keyboardType(.numberPad)
-                            .font(.title2.monospacedDigit())
-                            .focused($isTargetFocused)
-                        Text("mg")
-                            .foregroundStyle(CafadePalette.saffron)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        Text("A personal comparison point, not a safety limit.")
+                            .font(.subheadline)
+                            .foregroundStyle(CafadePalette.mist)
+                        HStack {
+                            TextField("1–1,000", text: $targetText)
+                                .keyboardType(.numberPad)
+                                .font(.title2.monospacedDigit())
+                                .focused($isTargetFocused)
+                            Text("mg")
+                                .foregroundStyle(CafadePalette.accentText)
+                        }
+                        .padding(16)
+                        .background(CafadePalette.paper.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        Button("Save target") {
+                            saveTarget()
+                        }
+                        .buttonStyle(CafadePrimaryButtonStyle())
+                        .disabled(targetMg == nil)
+                        .opacity(targetMg == nil ? 0.55 : 1)
+                        Button("Clear target") {
+                            clearTarget()
+                        }
+                        .buttonStyle(CafadeSecondaryButtonStyle())
                     }
-                    .padding(16)
-                    .background(CafadePalette.paper.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    Button("Save target") {
-                        settings.dailyTargetMg = Int(targetText).map { min(max($0, 0), 2_000) }
-                        try? modelContext.save()
-                        dismiss()
-                    }
-                    .buttonStyle(CafadePrimaryButtonStyle())
-                    Button("Clear target") {
-                        settings.dailyTargetMg = nil
-                        try? modelContext.save()
-                        dismiss()
-                    }
-                    .buttonStyle(CafadeSecondaryButtonStyle())
-                    Spacer()
+                    .padding(22)
                 }
-                .padding(22)
+                .scrollIndicators(.hidden)
             }
             .navigationTitle("Personal target")
             .navigationBarTitleDisplayMode(.inline)
@@ -489,8 +716,39 @@ struct DailyTargetSheet: View {
                 try? await Task.sleep(for: .milliseconds(250))
                 isTargetFocused = true
             }
+            .alert(
+                "Could not save target",
+                isPresented: Binding(
+                    get: { errorMessage != nil },
+                    set: { if !$0 { errorMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "Please try again.")
+            }
         }
-        .presentationDetents([.medium])
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
+    }
+
+    private func saveTarget() {
+        guard let targetMg else { return }
+        settings.dailyTargetMg = targetMg
+        persistAndDismiss()
+    }
+
+    private func clearTarget() {
+        settings.dailyTargetMg = nil
+        persistAndDismiss()
+    }
+
+    private func persistAndDismiss() {
+        do {
+            try AppServices.saveSettings(in: modelContext)
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
 
@@ -504,7 +762,7 @@ struct CafadeExportDocument: FileDocument {
         data = Data("{}".utf8)
     }
 
-    init(events: [IntakeEvent], settings: UserSettings) {
+    init(events: [IntakeEvent], settings: UserSettings) throws {
         let payload = CafadeExportPayload(
             exportedAt: .now,
             settings: .init(settings: settings),
@@ -513,7 +771,7 @@ struct CafadeExportDocument: FileDocument {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
-        data = (try? encoder.encode(payload)) ?? Data("{}".utf8)
+        data = try encoder.encode(payload)
     }
 
     init(configuration: ReadConfiguration) throws {
@@ -560,6 +818,8 @@ private struct CafadeExportEvent: Codable {
     let consumedAt: Date
     let servingNote: String?
     let sourceKind: String
+    let valueKind: String
+    let consumedTimeZoneIdentifier: String?
 
     init(event: IntakeEvent) {
         id = event.id
@@ -572,5 +832,7 @@ private struct CafadeExportEvent: Codable {
         consumedAt = event.consumedAt
         servingNote = event.servingNote
         sourceKind = event.sourceKindRaw
+        valueKind = event.valueKind.rawValue
+        consumedTimeZoneIdentifier = event.consumedTimeZoneIdentifier
     }
 }

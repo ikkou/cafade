@@ -68,6 +68,21 @@ struct CaffeineValue: Codable, Equatable, Hashable {
         )
     }
 
+    func isValid(maximumMg: Int) -> Bool {
+        guard typicalMg > 0, typicalMg <= maximumMg else { return false }
+
+        switch kind {
+        case .exact, .approximate:
+            return minMg == nil && maxMg == nil
+        case .range:
+            guard let minMg, let maxMg else { return false }
+            return minMg > 0
+                && minMg <= typicalMg
+                && typicalMg <= maxMg
+                && maxMg <= maximumMg
+        }
+    }
+
     var displayText: String {
         switch kind {
         case .exact:
@@ -132,8 +147,10 @@ final class IntakeEvent: Identifiable {
     var caffeineMg: Int
     var minMg: Int?
     var maxMg: Int?
+    var valueKindRaw: String?
     var quantityMultiplier: Double
     var consumedAt: Date
+    var consumedTimeZoneIdentifier: String?
     var servingNote: String?
     var sourceKindRaw: String
     var createdAt: Date
@@ -146,8 +163,10 @@ final class IntakeEvent: Identifiable {
         caffeineMg: Int,
         minMg: Int? = nil,
         maxMg: Int? = nil,
+        valueKind: CatalogValueKind? = nil,
         quantityMultiplier: Double = 1.0,
         consumedAt: Date,
+        consumedTimeZoneIdentifier: String = TimeZone.current.identifier,
         servingNote: String? = nil,
         sourceKind: IntakeSourceKind,
         createdAt: Date = .now,
@@ -159,8 +178,10 @@ final class IntakeEvent: Identifiable {
         self.caffeineMg = caffeineMg
         self.minMg = minMg
         self.maxMg = maxMg
+        self.valueKindRaw = valueKind?.rawValue
         self.quantityMultiplier = quantityMultiplier
         self.consumedAt = consumedAt
+        self.consumedTimeZoneIdentifier = consumedTimeZoneIdentifier
         self.servingNote = servingNote
         self.sourceKindRaw = sourceKind.rawValue
         self.createdAt = createdAt
@@ -177,16 +198,38 @@ final class IntakeEvent: Identifiable {
         return minMg != maxMg
     }
 
-    var value: CaffeineValue {
-        if let minMg, let maxMg, minMg != maxMg {
-            return .range(minMg, maxMg, typical: caffeineMg)
+    var valueKind: CatalogValueKind {
+        get {
+            if let valueKindRaw, let value = CatalogValueKind(rawValue: valueKindRaw) {
+                return value
+            }
+            return isRange ? .range : .approximate
         }
-        return .approximate(caffeineMg)
+        set { valueKindRaw = newValue.rawValue }
+    }
+
+    var value: CaffeineValue {
+        if valueKind == .range, let minMg, let maxMg {
+            return CaffeineValue(kind: .range, typicalMg: caffeineMg, minMg: minMg, maxMg: maxMg)
+        }
+        return CaffeineValue(kind: valueKind, typicalMg: caffeineMg, minMg: nil, maxMg: nil)
+    }
+
+    var healthKitSyncVersion: Int64 {
+        max(1, Int64((updatedAt.timeIntervalSince1970 * 1_000).rounded()))
+    }
+
+    func markUpdated(at date: Date = .now) {
+        let candidate = max(1, Int64((date.timeIntervalSince1970 * 1_000).rounded()))
+        let nextVersion = max(candidate, healthKitSyncVersion + 1)
+        updatedAt = Date(timeIntervalSince1970: Double(nextVersion) / 1_000)
     }
 }
 
 @Model
 final class UserSettings: Identifiable {
+    static let supportedHalfLifeHours = [2, 4, 6, 8]
+
     @Attribute(.unique) var id: String
     var marketCode: String
     var languageCode: String
@@ -232,6 +275,43 @@ final class UserSettings: Identifiable {
         return Calendar.current.date(from: components)
     }
 
+    @discardableResult
+    func normalizeForCurrentVersion() -> Bool {
+        var changed = false
+
+        if marketCode != "US" {
+            marketCode = "US"
+            changed = true
+        }
+        if languageCode != "en-US" {
+            languageCode = "en-US"
+            changed = true
+        }
+        if UnitSystem(rawValue: unitSystemRaw) == nil {
+            unitSystem = .usCustomary
+            changed = true
+        }
+        if !Self.supportedHalfLifeHours.contains(halfLifeHours) {
+            halfLifeHours = 4
+            changed = true
+        }
+        if let dailyTargetMg {
+            if dailyTargetMg <= 0 {
+                self.dailyTargetMg = nil
+                changed = true
+            } else if dailyTargetMg > CaffeineCalculator.customEntryMaximumMg {
+                self.dailyTargetMg = CaffeineCalculator.customEntryMaximumMg
+                changed = true
+            }
+        }
+        if let typicalBedtimeMinutes, !(0..<24 * 60).contains(typicalBedtimeMinutes) {
+            self.typicalBedtimeMinutes = nil
+            changed = true
+        }
+
+        return changed
+    }
+
     func resetToDefaults() {
         marketCode = "US"
         languageCode = "en-US"
@@ -258,6 +338,8 @@ enum VolumeFormatter {
 }
 
 enum CaffeineFormatter {
+    static let appLocale = Locale(identifier: "en-US")
+
     static func mg(_ value: Double) -> String {
         let rounded = Int(value.rounded())
         return "\(max(0, rounded)) mg"
@@ -269,10 +351,60 @@ enum CaffeineFormatter {
     }
 
     static func time(_ date: Date) -> String {
-        date.formatted(date: .omitted, time: .shortened)
+        date.formatted(.dateTime.locale(appLocale).hour().minute())
+    }
+
+    static func time(for event: IntakeEvent) -> String {
+        var style = Date.FormatStyle(date: .omitted, time: .shortened, locale: appLocale)
+        if let identifier = event.consumedTimeZoneIdentifier,
+           let timeZone = TimeZone(identifier: identifier) {
+            style.timeZone = timeZone
+        }
+        return event.consumedAt.formatted(style)
     }
 
     static func date(_ date: Date) -> String {
-        date.formatted(date: .abbreviated, time: .omitted)
+        date.formatted(.dateTime.locale(appLocale).year().month(.abbreviated).day())
+    }
+
+    static func date(for event: IntakeEvent) -> String {
+        var style = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: appLocale)
+        if let identifier = event.consumedTimeZoneIdentifier,
+           let timeZone = TimeZone(identifier: identifier) {
+            style.timeZone = timeZone
+        }
+        return event.consumedAt.formatted(style)
+    }
+
+    static func fullDay(_ date: Date) -> String {
+        date.formatted(.dateTime.locale(appLocale).weekday(.wide).month(.wide).day())
+    }
+
+    static func historyDay(_ date: Date) -> String {
+        date.formatted(.dateTime.locale(appLocale).weekday(.wide).month(.abbreviated).day())
+    }
+
+    static func weekday(_ date: Date, width: Date.FormatStyle.Symbol.Weekday = .abbreviated) -> String {
+        date.formatted(.dateTime.locale(appLocale).weekday(width))
+    }
+
+    static func longDate(_ date: Date) -> String {
+        date.formatted(.dateTime.locale(appLocale).year().month(.wide).day())
+    }
+
+    static func clock(minutes: Int) -> String {
+        let normalized = ((minutes % (24 * 60)) + (24 * 60)) % (24 * 60)
+        var components = DateComponents()
+        components.calendar = Calendar(identifier: .gregorian)
+        components.timeZone = TimeZone(secondsFromGMT: 0)
+        components.year = 2001
+        components.month = 1
+        components.day = 1
+        components.hour = normalized / 60
+        components.minute = normalized % 60
+        guard let date = components.date else { return "—" }
+        return date.formatted(
+            Date.FormatStyle(date: .omitted, time: .shortened, locale: appLocale, timeZone: TimeZone(secondsFromGMT: 0)!)
+        )
     }
 }

@@ -2,11 +2,19 @@ import SwiftData
 import SwiftUI
 
 struct SleepComparisonView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \IntakeEvent.consumedAt, order: .reverse) private var events: [IntakeEvent]
+    @Query private var events: [IntakeEvent]
     @Query private var settings: [UserSettings]
 
     private var userSettings: UserSettings? { settings.first }
+
+    init() {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .distantPast
+        _events = Query(
+            filter: #Predicate<IntakeEvent> { $0.consumedAt >= cutoff },
+            sort: \IntakeEvent.consumedAt,
+            order: .reverse
+        )
+    }
 
     var body: some View {
         ZStack {
@@ -31,7 +39,7 @@ struct SleepComparisonView: View {
             Text("YOUR BEDTIME")
                 .font(.caption.weight(.semibold))
                 .tracking(1.7)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text("Make room for sleep.")
                 .font(.system(.title, design: .serif).weight(.medium))
                 .foregroundStyle(CafadePalette.paper)
@@ -49,7 +57,7 @@ struct SleepComparisonView: View {
             CafadeGlassCard(tint: CafadePalette.sky.opacity(0.07)) {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack {
-                        Text("AT \(bedtime.formatted(date: .omitted, time: .shortened).uppercased())")
+                        Text("AT \(CaffeineFormatter.time(bedtime).uppercased())")
                             .font(.caption.weight(.semibold))
                             .tracking(1.2)
                             .foregroundStyle(CafadePalette.sky)

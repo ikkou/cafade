@@ -2,18 +2,22 @@ import SwiftData
 import SwiftUI
 
 struct DrinkDetailView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var services
     @Query private var settings: [UserSettings]
 
     let drink: CatalogDrink
+    let onLogged: (IntakeMutationOutcome) -> Void
     @State private var selectedItemID: String
     @State private var multiplier = 1.0
     @State private var consumedAt = Date.now
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    init(drink: CatalogDrink) {
+    init(drink: CatalogDrink, onLogged: @escaping (IntakeMutationOutcome) -> Void = { _ in }) {
         self.drink = drink
+        self.onLogged = onLogged
         _selectedItemID = State(initialValue: drink.id)
     }
 
@@ -22,7 +26,10 @@ struct DrinkDetailView: View {
     }
 
     private var variants: [CatalogDrink] {
-        CaffeineCatalog.variants(for: drink.familyID)
+        CaffeineCatalog.variants(
+            for: drink.familyID,
+            marketCode: settings.first?.marketCode ?? drink.marketCode
+        )
     }
 
     private var unitSystem: UnitSystem {
@@ -41,11 +48,13 @@ struct DrinkDetailView: View {
                     timeBlock
                     sourceBlock
                     Button {
-                        logNow()
+                        Task { await logNow() }
                     } label: {
                         Text("Log \(selectedItem.value.scaled(by: multiplier).displayText)")
                     }
                     .buttonStyle(CafadePrimaryButtonStyle())
+                    .disabled(isSaving || !isFinalValueValid)
+                    .opacity(isFinalValueValid ? 1 : 0.55)
                     .accessibilityIdentifier("drinkDetail.logNow")
                 }
                 .padding(20)
@@ -55,6 +64,18 @@ struct DrinkDetailView: View {
         }
         .navigationTitle("Drink detail")
         .navigationBarTitleDisplayMode(.inline)
+        .interactiveDismissDisabled(isSaving)
+        .alert(
+            "Could not log caffeine",
+            isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "Please try again.")
+        }
     }
 
     private var titleBlock: some View {
@@ -62,9 +83,9 @@ struct DrinkDetailView: View {
             Text(selectedItem.brand?.uppercased() ?? "CUSTOM CATALOG")
                 .font(.caption.weight(.semibold))
                 .tracking(1.7)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text(selectedItem.productName)
-                .font(.system(size: 34, weight: .medium, design: .serif))
+                .font(.system(.largeTitle, design: .serif).weight(.medium))
                 .foregroundStyle(CafadePalette.paper)
             Text("A useful starting point, with the estimate kept visible.")
                 .font(.subheadline)
@@ -78,12 +99,16 @@ struct DrinkDetailView: View {
                 HStack {
                     Text(selectedItem.value.kind.label)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(CafadePalette.saffron)
+                        .foregroundStyle(CafadePalette.accentText)
                     Spacer()
                     CafadePill(title: selectedItem.servingTitle(for: unitSystem), color: CafadePalette.mint)
                 }
                 Text(selectedItem.value.scaled(by: multiplier).displayText)
-                    .font(.system(size: 44, weight: .medium, design: .rounded))
+                    .font(
+                        dynamicTypeSize.isAccessibilitySize
+                            ? .system(.largeTitle, design: .rounded).weight(.medium)
+                            : .system(size: 44, weight: .medium, design: .rounded)
+                    )
                     .monospacedDigit()
                     .foregroundStyle(CafadePalette.paper)
                 Text("This estimate is based on the US recipe. Actual caffeine may vary by size and preparation.")
@@ -100,7 +125,7 @@ struct DrinkDetailView: View {
                 Text("SIZE")
                     .font(.caption.weight(.semibold))
                     .tracking(1.5)
-                    .foregroundStyle(CafadePalette.saffron)
+                    .foregroundStyle(CafadePalette.accentText)
                 ScrollView(.horizontal) {
                     HStack(spacing: 9) {
                         ForEach(variants) { variant in
@@ -129,20 +154,26 @@ struct DrinkDetailView: View {
             Text("HOW MUCH?")
                 .font(.caption.weight(.semibold))
                 .tracking(1.5)
-                .foregroundStyle(CafadePalette.saffron)
-            HStack(spacing: 9) {
-                ForEach([0.5, 1.0, 2.0], id: \.self) { value in
-                    Button {
-                        multiplier = value
-                    } label: {
-                        Text(value == 0.5 ? "0.5×" : value == 1.0 ? "1×" : "2×")
-                            .font(.headline.monospacedDigit())
-                            .foregroundStyle(multiplier == value ? CafadePalette.ink : CafadePalette.paper)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 13)
-                            .background(multiplier == value ? CafadePalette.saffron : CafadePalette.paper.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                }
+                .foregroundStyle(CafadePalette.accentText)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 9) { multiplierButtons }
+                VStack(spacing: 9) { multiplierButtons }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var multiplierButtons: some View {
+        ForEach([0.5, 1.0, 2.0], id: \.self) { value in
+            Button {
+                multiplier = value
+            } label: {
+                Text(value == 0.5 ? "0.5×" : value == 1.0 ? "1×" : "2×")
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(multiplier == value ? CafadePalette.ink : CafadePalette.paper)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(multiplier == value ? CafadePalette.saffron : CafadePalette.paper.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
     }
@@ -152,7 +183,7 @@ struct DrinkDetailView: View {
             Text("CONSUMED AT")
                 .font(.caption.weight(.semibold))
                 .tracking(1.5)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             DatePicker("Consumed at", selection: $consumedAt, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.compact)
                 .tint(CafadePalette.saffron)
@@ -171,7 +202,7 @@ struct DrinkDetailView: View {
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
                 }
-                Text("Verified \(selectedItem.verifiedAt.formatted(date: .abbreviated, time: .omitted))")
+                Text("Verified \(CaffeineFormatter.date(selectedItem.verifiedAt))")
                     .font(.caption2)
             }
             .foregroundStyle(CafadePalette.mint)
@@ -194,18 +225,31 @@ struct DrinkDetailView: View {
         .background(CafadePalette.paper.opacity(0.055), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private func logNow() {
-        let settings = settings.first ?? AppServices.ensureSettings(in: modelContext)
-        _ = services.log(
-            value: selectedItem.value,
-            catalogItemID: selectedItem.id,
-            multiplier: multiplier,
-            consumedAt: consumedAt,
-            servingNote: selectedItem.servingTitle(for: unitSystem),
-            sourceKind: .catalog,
-            context: modelContext,
-            settings: settings
-        )
-        dismiss()
+    private var isFinalValueValid: Bool {
+        selectedItem.value
+            .scaled(by: multiplier)
+            .isValid(maximumMg: CaffeineCalculator.customEntryMaximumMg)
+    }
+
+    private func logNow() async {
+        guard !isSaving else { return }
+        isSaving = true
+        defer { isSaving = false }
+        do {
+            let currentSettings = try (settings.first ?? AppServices.ensureSettings(in: modelContext))
+            let outcome = try await services.log(
+                value: selectedItem.value,
+                catalogItemID: selectedItem.id,
+                multiplier: multiplier,
+                consumedAt: consumedAt,
+                servingNote: selectedItem.servingTitle(for: unitSystem),
+                sourceKind: .catalog,
+                context: modelContext,
+                settings: currentSettings
+            )
+            onLogged(outcome)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }

@@ -5,7 +5,8 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppServices.self) private var services
     @EnvironmentObject private var entitlements: EntitlementService
-    @Query(sort: \IntakeEvent.consumedAt, order: .reverse) private var events: [IntakeEvent]
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Query private var events: [IntakeEvent]
     @Query private var settings: [UserSettings]
 
     @State private var selectedDays = 7
@@ -13,6 +14,15 @@ struct HistoryView: View {
     @State private var isPaywallPresented = false
 
     private var userSettings: UserSettings? { settings.first }
+
+    init() {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -91, to: .now) ?? .distantPast
+        _events = Query(
+            filter: #Predicate<IntakeEvent> { $0.consumedAt >= cutoff },
+            sort: \IntakeEvent.consumedAt,
+            order: .reverse
+        )
+    }
 
     private var interval: DateInterval {
         let end = Date.now
@@ -24,18 +34,17 @@ struct HistoryView: View {
         events.filter { interval.contains($0.consumedAt) }
     }
 
-    private var totals: [(day: Date, total: Int, highest: Int, last: Date?)] {
+    private var totals: [(day: Date, total: Int, last: Date?)] {
         CaffeineCalculator.dailyTotals(events: visibleEvents, in: interval)
     }
 
     private var average: Int {
-        let daysWithEntries = totals.filter { $0.total > 0 }
-        guard !daysWithEntries.isEmpty else { return 0 }
-        return Int((Double(daysWithEntries.reduce(0) { $0 + $1.total }) / Double(daysWithEntries.count)).rounded())
+        guard !totals.isEmpty else { return 0 }
+        return Int((Double(totals.reduce(0) { $0 + $1.total }) / Double(totals.count)).rounded())
     }
 
-    private var highest: Int { totals.map(\.highest).max() ?? 0 }
-    private var lastEvent: IntakeEvent? { visibleEvents.sorted { $0.consumedAt > $1.consumedAt }.first }
+    private var highest: Int { totals.map(\.total).max() ?? 0 }
+    private var lastEvent: IntakeEvent? { visibleEvents.first }
 
     var body: some View {
         NavigationStack {
@@ -56,6 +65,7 @@ struct HistoryView: View {
                 .scrollIndicators(.hidden)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .accessibilityHidden(selectedEvent != nil || isPaywallPresented)
             .navigationDestination(for: HistoryDestination.self) { destination in
                 switch destination {
                 case .insights:
@@ -72,6 +82,9 @@ struct HistoryView: View {
                 PaywallView()
                     .environmentObject(entitlements)
             }
+            .onChange(of: entitlements.isPro) { _, isPro in
+                if !isPro { selectedDays = 7 }
+            }
         }
     }
 
@@ -80,9 +93,9 @@ struct HistoryView: View {
             Text("LOOKING BACK")
                 .font(.caption.weight(.semibold))
                 .tracking(1.8)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text("YOUR PATTERNS")
-                .font(.system(size: 38, weight: .medium, design: .serif))
+                .font(.system(.largeTitle, design: .serif).weight(.medium))
                 .foregroundStyle(CafadePalette.paper)
             Text("A little context is more useful than a perfect score.")
                 .font(.subheadline)
@@ -91,12 +104,19 @@ struct HistoryView: View {
     }
 
     private var rangePicker: some View {
-        HStack(spacing: 8) {
-            rangeButton(title: "7 days", days: 7, isLocked: false)
-            rangeButton(title: "30 days", days: 30, isLocked: !entitlements.isPro)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { rangeButtons }
+            VStack(spacing: 8) { rangeButtons }
         }
         .padding(5)
-        .background(CafadePalette.paper.opacity(0.07), in: Capsule())
+        .background(CafadePalette.paper.opacity(0.07), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    @ViewBuilder
+    private var rangeButtons: some View {
+        rangeButton(title: "7 days", days: 7, isLocked: false)
+        rangeButton(title: "30 days", days: 30, isLocked: !entitlements.isPro)
+        rangeButton(title: "90 days", days: 90, isLocked: !entitlements.isPro)
     }
 
     private func rangeButton(title: String, days: Int, isLocked: Bool) -> some View {
@@ -126,18 +146,21 @@ struct HistoryView: View {
         CafadeGlassCard {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
-                    Text(selectedDays == 7 ? "THIS WEEK" : "LAST 30 DAYS")
+                    Text("LAST \(selectedDays) DAYS")
                         .font(.caption.weight(.semibold))
                         .tracking(1.5)
-                        .foregroundStyle(CafadePalette.saffron)
+                        .foregroundStyle(CafadePalette.accentText)
                     Spacer()
                     Image(systemName: "chart.xyaxis.line")
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .foregroundStyle(CafadePalette.mint)
                 }
-                HStack(alignment: .top, spacing: 0) {
-                    HistoryMetric(title: "Average", value: "\(average) mg")
-                    HistoryMetric(title: "Highest", value: "\(highest) mg")
-                    HistoryMetric(title: "Last caffeine", value: lastEvent.map { CaffeineFormatter.time($0.consumedAt) } ?? "—")
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: 14) { summaryMetrics }
+                    } else {
+                        HStack(alignment: .top, spacing: 0) { summaryMetrics }
+                    }
                 }
                 if visibleEvents.isEmpty {
                     Text("Log a drink to start building a useful record.")
@@ -149,6 +172,13 @@ struct HistoryView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var summaryMetrics: some View {
+        HistoryMetric(title: "Daily average", value: "\(average) mg")
+        HistoryMetric(title: "Highest day", value: "\(highest) mg")
+        HistoryMetric(title: "Last caffeine", value: lastEvent.map(CaffeineFormatter.time(for:)) ?? "—")
     }
 
     private var insightLinks: some View {
@@ -201,8 +231,9 @@ struct HistoryView: View {
         HStack(spacing: 13) {
             Image(systemName: symbol)
                 .font(.title3)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .foregroundStyle(color)
-                .frame(width: 28)
+                .frame(width: 32)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
@@ -214,6 +245,7 @@ struct HistoryView: View {
             Spacer()
             Image(systemName: entitlements.isPro ? "chevron.right" : "lock.fill")
                 .font(.caption.weight(.bold))
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .foregroundStyle(CafadePalette.mist)
         }
         .padding(16)
@@ -232,7 +264,7 @@ struct HistoryView: View {
                 LazyVStack(alignment: .leading, spacing: 16) {
                     ForEach(groupedDays, id: \.day) { group in
                         VStack(alignment: .leading, spacing: 9) {
-                            Text(group.day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+                            Text(CaffeineFormatter.historyDay(group.day))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(CafadePalette.mint)
                             ForEach(group.events) { event in
@@ -276,8 +308,6 @@ private struct HistoryMetric: View {
             Text(value)
                 .font(.subheadline.monospacedDigit().weight(.semibold))
                 .foregroundStyle(CafadePalette.paper)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -286,47 +316,71 @@ private struct HistoryMetric: View {
 private struct HistoryEntryRow: View {
     let event: IntakeEvent
     let unitSystem: UnitSystem
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text(event.consumedAt.formatted(date: .omitted, time: .shortened))
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(CafadePalette.mist)
-                .frame(width: 76, alignment: .leading)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(CaffeineCatalog.displayName(for: event))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(CafadePalette.paper)
-                    .lineLimit(1)
-                if let catalogItem = CaffeineCatalog.item(id: event.catalogItemID) {
-                    Text(catalogItem.servingTitle(for: unitSystem))
-                        .font(.caption2)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(CaffeineFormatter.time(for: event))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(CafadePalette.mist)
+                        Spacer()
+                        eventValue
+                    }
+                    eventDescription
+                }
+            } else {
+                HStack(spacing: 12) {
+                    Text(CaffeineFormatter.time(for: event))
+                        .font(.caption.monospacedDigit())
                         .foregroundStyle(CafadePalette.mist)
-                } else if let note = event.servingNote, !note.isEmpty {
-                    Text(note)
-                        .font(.caption2)
+                        .frame(width: 76, alignment: .leading)
+                    eventDescription
+                    Spacer()
+                    eventValue
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(CafadePalette.mist)
                 }
             }
-            Spacer()
-            Text(CaffeineCatalog.value(for: event).displayText)
-                .font(.caption.monospacedDigit().weight(.semibold))
-                .foregroundStyle(CafadePalette.saffron)
-            Image(systemName: "chevron.right")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(CafadePalette.mist)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 13)
         .background(CafadePalette.paper.opacity(0.055), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(CafadePalette.line, lineWidth: 1))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(CaffeineCatalog.displayName(for: event)), \(CaffeineCatalog.value(for: event).displayText), \(CaffeineFormatter.time(event.consumedAt))")
+        .accessibilityLabel("\(CaffeineCatalog.displayName(for: event)), \(CaffeineCatalog.value(for: event).displayText), \(CaffeineFormatter.time(for: event))")
     }
+
+    private var eventDescription: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(CaffeineCatalog.displayName(for: event))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(CafadePalette.paper)
+            if let catalogItem = CaffeineCatalog.item(id: event.catalogItemID) {
+                Text(catalogItem.servingTitle(for: unitSystem))
+                    .font(.caption2)
+                    .foregroundStyle(CafadePalette.mist)
+            } else if let note = event.servingNote, !note.isEmpty {
+                Text(note)
+                    .font(.caption2)
+                    .foregroundStyle(CafadePalette.mist)
+            }
+        }
+    }
+
+    private var eventValue: some View {
+        Text(CaffeineCatalog.value(for: event).displayText)
+            .font(.caption.monospacedDigit().weight(.semibold))
+            .foregroundStyle(CafadePalette.accentText)
+    }
+
 }
 
 private struct MiniBarChart: View {
-    let totals: [(day: Date, total: Int, highest: Int, last: Date?)]
+    let totals: [(day: Date, total: Int, last: Date?)]
 
     var body: some View {
         let maxValue = max(1, totals.map(\.total).max() ?? 1)
@@ -336,7 +390,7 @@ private struct MiniBarChart: View {
                     RoundedRectangle(cornerRadius: 5, style: .continuous)
                         .fill(item.total > 0 ? CafadePalette.saffron : CafadePalette.paper.opacity(0.10))
                         .frame(height: max(5, CGFloat(item.total) / CGFloat(maxValue) * 54))
-                    Text(item.day.formatted(.dateTime.weekday(.narrow)))
+                    Text(CaffeineFormatter.weekday(item.day, width: .narrow))
                         .font(.caption2)
                         .foregroundStyle(CafadePalette.mist)
                 }

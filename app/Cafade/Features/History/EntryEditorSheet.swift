@@ -13,6 +13,9 @@ struct EntryEditorSheet: View {
     @State private var servingNote: String
     @State private var consumedAt: Date
     @State private var showingDeleteConfirmation = false
+    @State private var message: String?
+    @State private var dismissAfterMessage = false
+    @State private var isWorking = false
 
     init(event: IntakeEvent) {
         self.event = event
@@ -22,7 +25,14 @@ struct EntryEditorSheet: View {
         _consumedAt = State(initialValue: event.consumedAt)
     }
 
-    private var caffeineMg: Int? { Int(caffeineText).map { min(max($0, 0), 2_000) } }
+    private var caffeineMg: Int? {
+        guard let value = Int(caffeineText),
+              (CaffeineCalculator.customEntryMinimumMg...CaffeineCalculator.customEntryMaximumMg).contains(value)
+        else {
+            return nil
+        }
+        return value
+    }
     private var isCustom: Bool { event.sourceKind == .custom }
 
     var body: some View {
@@ -42,15 +52,24 @@ struct EntryEditorSheet: View {
 
                         editorField(title: "TYPICAL CAFFEINE") {
                             HStack {
-                                TextField("mg", text: $caffeineText)
+                                TextField("1–1,000", text: $caffeineText)
                                     .keyboardType(.numberPad)
                                 Text("mg")
-                                    .foregroundStyle(CafadePalette.saffron)
+                                    .foregroundStyle(CafadePalette.accentText)
                             }
                         }
 
                         editorField(title: "SERVING NOTE") {
-                            TextField("Optional note", text: $servingNote)
+                            VStack(alignment: .trailing, spacing: 6) {
+                                TextField("Optional note", text: $servingNote)
+                                Text("\(servingNote.count)/\(CaffeineCalculator.servingNoteMaximumLength)")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(
+                                        servingNote.count > CaffeineCalculator.servingNoteMaximumLength
+                                            ? CafadePalette.coral
+                                            : CafadePalette.mist
+                                    )
+                            }
                         }
 
                         DatePicker("Consumed at", selection: $consumedAt, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
@@ -58,12 +77,12 @@ struct EntryEditorSheet: View {
                             .foregroundStyle(CafadePalette.paper)
 
                         Button {
-                            save()
+                            Task { await save() }
                         } label: {
                             Text("Save changes")
                         }
                         .buttonStyle(CafadePrimaryButtonStyle())
-                        .disabled(caffeineMg == nil || customName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(!isValid || isWorking)
                         .opacity(caffeineMg == nil ? 0.5 : 1)
 
                         Button(role: .destructive) {
@@ -74,6 +93,7 @@ struct EntryEditorSheet: View {
                         }
                         .buttonStyle(CafadeSecondaryButtonStyle())
                         .foregroundStyle(CafadePalette.coral)
+                        .disabled(isWorking)
                     }
                     .padding(20)
                     .padding(.bottom, 30)
@@ -89,15 +109,30 @@ struct EntryEditorSheet: View {
             }
             .confirmationDialog("Delete this entry?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete", role: .destructive) {
-                    delete()
+                    Task { await delete() }
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("This removes the entry from Cafade. If Apple Health is connected, its Cafade sample is removed too.")
             }
+            .alert(
+                "Cafade",
+                isPresented: Binding(
+                    get: { message != nil },
+                    set: { if !$0 { message = nil } }
+                )
+            ) {
+                Button("OK") {
+                    message = nil
+                    if dismissAfterMessage { dismiss() }
+                }
+            } message: {
+                Text(message ?? "")
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .interactiveDismissDisabled(isWorking)
     }
 
     private var header: some View {
@@ -105,12 +140,12 @@ struct EntryEditorSheet: View {
             Text(event.sourceKind == .catalog ? "CATALOG ENTRY" : "CUSTOM ENTRY")
                 .font(.caption.weight(.semibold))
                 .tracking(1.5)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             Text(CaffeineCatalog.displayName(for: event))
                 .font(.system(.title2, design: .serif).weight(.medium))
                 .foregroundStyle(CafadePalette.paper)
             if event.isRange {
-                Text("The original catalog value was a typical range. The range remains part of the estimate.")
+                Text("The original value is a range. If you change the amount, Cafade saves the new value as an approximation and removes the old range.")
                     .font(.caption)
                     .foregroundStyle(CafadePalette.mist)
             }
@@ -122,7 +157,7 @@ struct EntryEditorSheet: View {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .tracking(1.4)
-                .foregroundStyle(CafadePalette.saffron)
+                .foregroundStyle(CafadePalette.accentText)
             content()
                 .padding(15)
                 .background(CafadePalette.paper.opacity(0.07), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
@@ -130,29 +165,62 @@ struct EntryEditorSheet: View {
         }
     }
 
-    private func save() {
-        guard let caffeineMg else { return }
-        let currentSettings = settings.first ?? AppServices.ensureSettings(in: modelContext)
-        services.update(
-            event: event,
-            caffeineMg: caffeineMg,
-            minMg: event.minMg,
-            maxMg: event.maxMg,
-            consumedAt: consumedAt,
-            servingNote: servingNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : servingNote,
-            context: modelContext,
-            settings: currentSettings
-        )
+    private var isValid: Bool {
+        guard caffeineMg != nil,
+              servingNote.trimmingCharacters(in: .whitespacesAndNewlines).count <= CaffeineCalculator.servingNoteMaximumLength
+        else { return false }
         if isCustom {
-            event.customName = customName.trimmingCharacters(in: .whitespacesAndNewlines)
-            try? modelContext.save()
+            let normalized = customName.trimmingCharacters(in: .whitespacesAndNewlines)
+            return !normalized.isEmpty && normalized.count <= CaffeineCalculator.customNameMaximumLength
         }
-        dismiss()
+        return true
     }
 
-    private func delete() {
-        let currentSettings = settings.first ?? AppServices.ensureSettings(in: modelContext)
-        services.delete(event: event, context: modelContext, settings: currentSettings)
-        dismiss()
+    private func save() async {
+        guard let caffeineMg else { return }
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let currentSettings = try (settings.first ?? AppServices.ensureSettings(in: modelContext))
+            let value = caffeineMg == event.caffeineMg
+                ? CaffeineCatalog.value(for: event)
+                : CaffeineValue.approximate(caffeineMg)
+            let outcome = try await services.update(
+                event: event,
+                value: value,
+                customName: isCustom ? customName : event.customName,
+                consumedAt: consumedAt,
+                servingNote: servingNote,
+                context: modelContext,
+                settings: currentSettings
+            )
+            if let warning = outcome.healthWarning {
+                dismissAfterMessage = true
+                message = warning
+            } else {
+                dismiss()
+            }
+        } catch {
+            dismissAfterMessage = false
+            message = error.localizedDescription
+        }
+    }
+
+    private func delete() async {
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let currentSettings = try (settings.first ?? AppServices.ensureSettings(in: modelContext))
+            let outcome = try await services.delete(event: event, context: modelContext, settings: currentSettings)
+            if let warning = outcome.healthWarning {
+                dismissAfterMessage = true
+                message = warning
+            } else {
+                dismiss()
+            }
+        } catch {
+            dismissAfterMessage = false
+            message = error.localizedDescription
+        }
     }
 }

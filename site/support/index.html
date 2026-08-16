@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#071326" />
+    <meta name="theme-color" content="#f8f3e9" />
     <meta name="description" content="Support for Cafade." />
     <link rel="canonical" href="https://cafade.oneshotstar.com/support/" />
     <title>Support — Cafade</title>
-    <link rel="icon" href="/assets/og.png" type="image/png" />
+    <link rel="icon" href="/assets/app-icon.png" type="image/png" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
@@ -29,7 +29,8 @@
       <div class="legal-content">
         <section>
           <h2>Logging a drink</h2>
-          <p>Tap <strong>Log caffeine</strong> on Today, choose a catalog item, adjust the serving if needed, and save. For a product that is not listed, use Custom drink and enter the caffeine amount from its label or ingredient panel.</p>
+          <p>Tap the <strong>+</strong> button on Today. A Suggested or Recent item is logged immediately at the current time; use Undo if you tapped the wrong item. Search for a drink when you want to review its size, quantity, or consumed time before saving.</p>
+          <p>For a product that is not listed, use Custom drink and enter the caffeine amount from its label, supplement panel, or medicine facts box.</p>
           <p>Cafade keeps the amount you entered visible as an estimate. Product values can vary by recipe, size, preparation, and region.</p>
         </section>
         <section>
@@ -44,7 +45,17 @@
         <section>
           <h2>HealthKit</h2>
           <p>HealthKit is optional. In the first release, Cafade can write your chosen entries as Dietary Caffeine. The app does not need HealthKit permission to work, and the first release does not read sleep data.</p>
-          <p>If you deny permission, your in-app log and manual bedtime setting continue to work.</p>
+          <p>If you deny permission, your in-app log and manual bedtime setting continue to work. To change a denied permission, enable Dietary Caffeine for Cafade in Apple Health, then return to Cafade and choose Connect Apple Health in Settings.</p>
+          <p>After connecting, choose Sync saved entries to retry any Cafade records that did not reach Health. Choose Stop saving new entries to pause future Health writes. Pausing does not remove existing samples; choose Resume Apple Health to sync again.</p>
+          <p>If a Health copy could not be removed after you delete an entry, Settings shows a pending-cleanup action so you can retry without restoring the local entry.</p>
+        </section>
+        <section>
+          <h2>Sharing a card</h2>
+          <p>Open Share from Today to preview an image of that day’s estimate, curve, total logged amount, and recent drinks. Share opens the iOS share sheet. Save Image asks only for permission to add the card to Photos.</p>
+        </section>
+        <section>
+          <h2>Exporting or deleting your data</h2>
+          <p>Settings can export a readable JSON copy of your local log. Delete all data removes Cafade’s local entries and settings, then attempts to remove samples that Cafade wrote to Apple Health.</p>
         </section>
         <section>
           <h2>Cafade Pro and Restore</h2>
@@ -54,7 +65,7 @@
         <section>
           <h2>Contact</h2>
           <div class="contact-block">
-            <p>Email <a href="mailto:i@oneshotstar.com">i@oneshotstar.com</a>. Include your iPhone model, iOS version, Cafade version, and the steps that led to the issue. Please do not send Health data or other private information unless support asks for a specific detail.</p>
+            <p>Email <a href="mailto:i+cafade@oneshotstar.com">i+cafade@oneshotstar.com</a>. Include your iPhone model, iOS version, Cafade version, and the steps that led to the issue. Please do not send Health data or other private information unless support asks for a specific detail.</p>
           </div>
         </section>
         <a class="back-link" href="/">← Back to Cafade</a>
@@ -63,7 +74,7 @@
     <footer class="site-footer">
       <div class="footer-inner">
         <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>cafade</a>
-        <div class="site-nav" aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="mailto:i@oneshotstar.com">Contact</a></div>
+        <div class="site-nav" aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="mailto:i+cafade@oneshotstar.com">Contact</a></div>
         <span class="footer-meta">© 2026 ONE SHOT STAR</span>
       </div>
     </footer>

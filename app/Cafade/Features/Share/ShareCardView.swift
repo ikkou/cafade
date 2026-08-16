@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Photos
 
 struct CafadeShareDrink: Identifiable, Equatable {
     let id: String
@@ -12,12 +13,28 @@ struct CafadeShareSnapshot: Equatable {
     let date: Date
     let estimate: CaffeineEstimate
     let drinks: [CafadeShareDrink]
+    let totalDrinkCount: Int
+    let totalLoggedMg: Int
+    let curveValues: [Double]
+    let hasCarryover: Bool
     let halfLifeHours: Int
 
     init(date: Date, estimate: CaffeineEstimate, events: [IntakeEvent], halfLifeHours: Int) {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? date
+        let dayEvents = events.filter { $0.consumedAt >= dayStart && $0.consumedAt < dayEnd }
+        let dayMidpoint = dayStart.addingTimeInterval(dayEnd.timeIntervalSince(dayStart) / 2)
+        let curve = CaffeineCalculator.timeline(
+            events: events,
+            centeredAt: dayMidpoint,
+            halfLifeHours: halfLifeHours,
+            points: 49,
+            spanHours: dayEnd.timeIntervalSince(dayStart) / 3600
+        )
         self.date = date
         self.estimate = estimate
-        self.drinks = events
+        self.drinks = dayEvents
             .sorted(by: { $0.consumedAt > $1.consumedAt })
             .prefix(4)
             .map {
@@ -28,16 +45,32 @@ struct CafadeShareSnapshot: Equatable {
                     time: CaffeineFormatter.time($0.consumedAt)
                 )
             }
+        self.totalDrinkCount = dayEvents.count
+        self.totalLoggedMg = dayEvents.reduce(0) { $0 + $1.caffeineMg }
+        self.curveValues = curve.map(\.estimate.typicalMg)
+        self.hasCarryover = CaffeineCalculator
+            .estimate(events: events, at: dayStart, halfLifeHours: halfLifeHours)
+            .typicalMg >= 0.5
         self.halfLifeHours = halfLifeHours
     }
 }
 
+private struct ShareImagePayload: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 struct ShareCardSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     let snapshot: CafadeShareSnapshot
 
-    @State private var renderedImage: UIImage?
-    @State private var showingShareSheet = false
+    @State private var sharePayload: ShareImagePayload?
+    @State private var cardImage: UIImage?
+    @State private var isRendering = true
+    @State private var showingSavedAlert = false
+    @State private var showingPhotoPermissionAlert = false
+    @State private var saveErrorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -49,9 +82,9 @@ struct ShareCardSheet: View {
                             Text("A SMALL MOMENT TO SHARE")
                                 .font(.caption.weight(.semibold))
                                 .tracking(1.7)
-                                .foregroundStyle(CafadePalette.saffron)
+                                .foregroundStyle(CafadePalette.accentText)
                             Text("Your day, in one card.")
-                                .font(.system(size: 31, weight: .regular, design: .serif))
+                                .font(.system(.title, design: .serif).weight(.regular))
                                 .foregroundStyle(CafadePalette.ink)
                             Text("Export the shape of your caffeine day as an image.")
                                 .font(.subheadline)
@@ -63,11 +96,32 @@ struct ShareCardSheet: View {
                             .shadow(color: CafadePalette.ink.opacity(0.14), radius: 20, y: 12)
 
                         Button {
-                            renderAndShare()
+                            prepareShare()
                         } label: {
                             Label("SHARE THIS CARD", systemImage: "square.and.arrow.up")
                         }
                         .buttonStyle(CafadePrimaryButtonStyle())
+                        .disabled(cardImage == nil)
+                        .opacity(cardImage == nil ? 0.55 : 1)
+
+                        Button {
+                            saveCardImage()
+                        } label: {
+                            Label("SAVE IMAGE", systemImage: "square.and.arrow.down")
+                        }
+                        .buttonStyle(CafadeSecondaryButtonStyle())
+                        .disabled(cardImage == nil)
+                        .opacity(cardImage == nil ? 0.55 : 1)
+
+                        if isRendering {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("Preparing your card…")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(CafadePalette.mist)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
 
                         Text("Cafade shares only the card image you choose. Your log stays on this device unless you share it.")
                             .font(.caption)
@@ -89,20 +143,110 @@ struct ShareCardSheet: View {
                 }
             }
         }
-        .sheet(isPresented: $showingShareSheet, onDismiss: { renderedImage = nil }) {
-            if let renderedImage {
-                CafadeActivityView(activityItems: [renderedImage])
+        .sheet(item: $sharePayload) { payload in
+            CafadeActivityView(activityItems: [payload.image])
+        }
+        .alert("Saved to Photos", isPresented: $showingSavedAlert) {
+            Button("Done", role: .cancel) { }
+        } message: {
+            Text("Your Cafade card is ready in Photos.")
+        }
+        .alert("Photos access is off", isPresented: $showingPhotoPermissionAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+            }
+            Button("Not now", role: .cancel) { }
+        } message: {
+            Text("Allow Cafade to add images in iPhone Settings before saving a card.")
+        }
+        .alert(
+            "Could not save card",
+            isPresented: Binding(
+                get: { saveErrorMessage != nil },
+                set: { if !$0 { saveErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { saveErrorMessage = nil }
+        } message: {
+            Text(saveErrorMessage ?? "Please try again.")
+        }
+        .task(id: snapshot) {
+            renderCardIfNeeded()
+        }
+    }
+
+    @MainActor
+    private func makeCardImage() -> UIImage? {
+        let renderer = ImageRenderer(
+            content: CafadeShareCard(snapshot: snapshot)
+                .frame(width: 1080, height: CafadeShareCard.canvasHeight(for: snapshot))
+        )
+        return renderer.uiImage
+    }
+
+    private func prepareShare() {
+        guard let image = cardImage else {
+            saveErrorMessage = "The card is still being prepared. Please try again in a moment."
+            return
+        }
+        sharePayload = ShareImagePayload(image: image)
+    }
+
+    private func saveCardImage() {
+        guard let image = cardImage else {
+            saveErrorMessage = "The card is still being prepared. Please try again in a moment."
+            return
+        }
+
+        switch PHPhotoLibrary.authorizationStatus(for: .addOnly) {
+        case .authorized, .limited:
+            saveImageToPhotos(image)
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+                guard status == .authorized || status == .limited else {
+                    Task { @MainActor in
+                        showingPhotoPermissionAlert = true
+                    }
+                    return
+                }
+                saveImageToPhotos(image)
+            }
+        case .denied, .restricted:
+            showingPhotoPermissionAlert = true
+        @unknown default:
+            showingPhotoPermissionAlert = true
+        }
+    }
+
+    private func saveImageToPhotos(_ image: UIImage) {
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.creationRequestForAsset(from: image)
+        } completionHandler: { success, error in
+            Task { @MainActor in
+                if success {
+                    showingSavedAlert = true
+                } else {
+                    saveErrorMessage = error?.localizedDescription
+                        ?? "Cafade could not add the image to Photos."
+                }
             }
         }
     }
 
-    private func renderAndShare() {
-        let renderer = ImageRenderer(
-            content: CafadeShareCard(snapshot: snapshot)
-                .frame(width: 1080, height: 1350)
-        )
-        renderedImage = renderer.uiImage
-        showingShareSheet = renderedImage != nil
+    @MainActor
+    private func renderCardIfNeeded() {
+        guard cardImage == nil else {
+            isRendering = false
+            return
+        }
+        isRendering = true
+        cardImage = makeCardImage()
+        isRendering = false
+        if cardImage == nil {
+            saveErrorMessage = "Cafade could not render this card. Please close it and try again."
+        }
     }
 }
 
@@ -112,17 +256,36 @@ private struct CafadeShareCardPreview: View {
     var body: some View {
         GeometryReader { proxy in
             let width = proxy.size.width
+            let height = CafadeShareCard.canvasHeight(for: snapshot)
             CafadeShareCard(snapshot: snapshot)
-                .frame(width: 1080, height: 1350)
-                .scaleEffect(width / 1080)
-                .frame(width: width, height: width * 1.25)
+                .frame(width: 1080, height: height)
+                .scaleEffect(width / 1080, anchor: .topLeading)
+                .frame(width: width, height: width * height / 1080, alignment: .topLeading)
+                .clipped()
         }
-        .aspectRatio(0.8, contentMode: .fit)
+        .aspectRatio(1080 / CafadeShareCard.canvasHeight(for: snapshot), contentMode: .fit)
     }
 }
 
 struct CafadeShareCard: View {
     let snapshot: CafadeShareSnapshot
+
+    static func canvasHeight(for snapshot: CafadeShareSnapshot) -> CGFloat {
+        guard !snapshot.drinks.isEmpty else { return 1_080 }
+
+        var height = 1_050 + CGFloat(snapshot.drinks.count) * 42
+        if snapshot.totalDrinkCount > snapshot.drinks.count {
+            height += 30
+        }
+        if snapshot.hasCarryover {
+            height += 30
+        }
+        return min(max(height, 1_120), 1_280)
+    }
+
+    private var orbTextColor: Color {
+        snapshot.estimate.typicalMg > 0 ? .white : CafadePalette.ink
+    }
 
     var body: some View {
         ZStack {
@@ -153,10 +316,10 @@ struct CafadeShareCard: View {
                             .font(.system(size: 25, weight: .semibold, design: .serif))
                             .tracking(4.2)
                             .foregroundStyle(CafadePalette.ink)
-                        Text(snapshot.date.formatted(.dateTime.weekday(.wide).month(.wide).day()).uppercased())
+                        Text(CaffeineFormatter.fullDay(snapshot.date).uppercased())
                             .font(.system(size: 17, weight: .semibold))
                             .tracking(1.5)
-                            .foregroundStyle(CafadePalette.saffron)
+                            .foregroundStyle(CafadePalette.accentText)
                     }
                     Spacer()
                     Text("YOUR DAY")
@@ -169,36 +332,45 @@ struct CafadeShareCard: View {
                     .font(.system(size: 54, weight: .regular, design: .serif))
                     .foregroundStyle(CafadePalette.ink)
                     .lineSpacing(-2)
-                    .padding(.top, 88)
+                    .padding(.top, 50)
 
                 ZStack {
-                    CafadeCaffeineOrb(estimate: snapshot.estimate)
+                    CafadeCaffeineOrb(
+                        estimate: snapshot.estimate,
+                        isActive: false,
+                        maxOrbWidth: 760,
+                        maxOrbHeight: 250
+                    )
                         .frame(maxWidth: .infinity)
-                        .frame(height: 280)
-                        .padding(.horizontal, 46)
+                    .frame(height: 260)
+                        .padding(.horizontal, 40)
                     VStack(spacing: 7) {
+                        let estimateFontSize: CGFloat = snapshot.estimate.shortDisplayText.count > 8 ? 58 : 72
                         HStack(alignment: .lastTextBaseline, spacing: 9) {
                             Text(snapshot.estimate.shortDisplayText)
-                                .font(.system(size: 78, weight: .regular, design: .serif))
+                                .font(.system(size: estimateFontSize, weight: .regular, design: .serif))
                                 .monospacedDigit()
-                                .foregroundStyle(Color.white)
+                                .foregroundStyle(orbTextColor)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
                             Text("mg")
-                                .font(.system(size: 30, weight: .medium, design: .serif))
-                                .foregroundStyle(Color.white.opacity(0.9))
+                                .font(.system(size: 28, weight: .medium, design: .serif))
+                                .foregroundStyle(orbTextColor.opacity(0.9))
                         }
+                        .frame(maxWidth: .infinity)
                         Text(snapshot.estimate.maxMg < 1 ? "waiting for your first log" : "remaining now · fading slowly")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(Color.white.opacity(0.9))
+                            .foregroundStyle(orbTextColor.opacity(0.9))
                     }
                 }
-                .padding(.top, 42)
+                .padding(.top, 24)
 
                 VStack(alignment: .leading, spacing: 14) {
                     HStack {
                         Text("TODAY'S CURVE")
                             .font(.system(size: 16, weight: .semibold))
                             .tracking(2)
-                            .foregroundStyle(CafadePalette.saffron)
+                            .foregroundStyle(CafadePalette.accentText)
                         Spacer()
                         Text("HALF-LIFE \(snapshot.halfLifeHours)H")
                             .font(.system(size: 15, weight: .semibold))
@@ -206,15 +378,19 @@ struct CafadeShareCard: View {
                             .foregroundStyle(CafadePalette.mist)
                     }
 
-                    CafadeShareSparkline(estimate: snapshot.estimate)
-                        .frame(height: 112)
+                    CafadeShareSparkline(values: snapshot.curveValues)
+                        .frame(height: 100)
 
                     HStack(spacing: 12) {
-                        shareStat(label: "LOGGED", value: "\(snapshot.drinks.count) drinks", tint: CafadePalette.mint)
+                        shareStat(
+                            label: "LOGGED",
+                            value: "\(snapshot.totalDrinkCount) drink\(snapshot.totalDrinkCount == 1 ? "" : "s") · \(snapshot.totalLoggedMg) mg",
+                            tint: CafadePalette.mint
+                        )
                         shareStat(label: "NOW", value: "\(snapshot.estimate.shortDisplayText) mg", tint: CafadePalette.sky)
                     }
                 }
-                .padding(.top, 54)
+                .padding(.top, 32)
 
                 if !snapshot.drinks.isEmpty {
                     VStack(alignment: .leading, spacing: 9) {
@@ -234,27 +410,55 @@ struct CafadeShareCard: View {
                             .font(.system(size: 17, weight: .medium))
                             .foregroundStyle(CafadePalette.ink)
                         }
+                        if snapshot.totalDrinkCount > snapshot.drinks.count {
+                            Text("+ \(snapshot.totalDrinkCount - snapshot.drinks.count) more in the log")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(CafadePalette.mist)
+                        }
+                        if snapshot.hasCarryover {
+                            Label("Curve includes caffeine carried over from earlier logs", systemImage: "arrow.turn.down.right")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(CafadePalette.mist)
+                        }
                     }
-                    .padding(.top, 46)
+                    .padding(.top, 32)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("READY FOR YOUR FIRST LOG")
+                            .font(.system(size: 15, weight: .semibold))
+                            .tracking(1.9)
+                            .foregroundStyle(CafadePalette.mist)
+                        Text("Your first drink will draw the shape of this day.")
+                            .font(.system(size: 17, weight: .medium, design: .serif))
+                            .foregroundStyle(CafadePalette.ink)
+                    }
+                    .padding(.top, 32)
                 }
 
-                Spacer(minLength: 20)
+                Spacer(minLength: 12)
 
                 HStack {
                     Text("KNOW WHAT YOU DRANK. SEE WHAT REMAINS.")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .tracking(1.3)
                         .foregroundStyle(CafadePalette.mist)
                     Spacer()
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(CafadePalette.saffron)
+                        .foregroundStyle(CafadePalette.accentText)
                 }
             }
-            .padding(64)
+            .padding(60)
         }
+        .frame(width: 1080, height: Self.canvasHeight(for: snapshot), alignment: .topLeading)
+        .clipped()
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Cafade share card for \(snapshot.date.formatted(date: .long, time: .omitted))")
+        .accessibilityLabel(
+            "Cafade share card for \(CaffeineFormatter.longDate(snapshot.date)). "
+                + "\(snapshot.totalDrinkCount) drinks, \(snapshot.totalLoggedMg) milligrams logged, "
+                + "\(snapshot.estimate.displayText) estimated remaining now"
+                + (snapshot.hasCarryover ? ", including carryover from earlier logs" : "")
+        )
     }
 
     private func shareStat(label: String, value: String, tint: Color) -> some View {
@@ -278,16 +482,16 @@ struct CafadeShareCard: View {
 }
 
 private struct CafadeShareSparkline: View {
-    let estimate: CaffeineEstimate
+    let values: [Double]
 
     var body: some View {
         Canvas { context, size in
-            let intensity = min(max(estimate.typicalMg / 180, 0.22), 1)
-            let values: [CGFloat] = [0.18, 0.43, 0.82, 0.66, 0.53, 0.43, CGFloat(0.18 + intensity * 0.42)]
+            guard values.count > 1 else { return }
+            let maximum = max(values.max() ?? 0, 1)
             let points = values.enumerated().map { index, value in
                 CGPoint(
                     x: size.width * CGFloat(index) / CGFloat(values.count - 1),
-                    y: size.height * (1 - value)
+                    y: size.height - size.height * CGFloat(value / maximum) * 0.88
                 )
             }
             var line = Path()

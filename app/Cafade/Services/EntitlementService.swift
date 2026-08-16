@@ -3,7 +3,7 @@ import Foundation
 import RevenueCat
 
 @MainActor
-final class EntitlementService: ObservableObject {
+final class EntitlementService: NSObject, ObservableObject {
     enum State: Equatable {
         case notConfigured
         case idle
@@ -24,22 +24,35 @@ final class EntitlementService: ObservableObject {
                 false
             }
         }
+
+        var failureMessage: String? {
+            if case .failed(let message) = self { return message }
+            return nil
+        }
     }
 
     struct SubscriptionOption: Identifiable {
         fileprivate let package: Package?
 
         let id: String
+        let productIdentifier: String
         let title: String
         let price: String
-        let hasIntroductoryOffer: Bool
         let periodLabel: String
+        let eligibleTrialLabel: String?
 
-        fileprivate init(package: Package) {
+        var renewalDescription: String {
+            if let eligibleTrialLabel {
+                return "\(eligibleTrialLabel) free, then \(price) \(periodLabel). Auto-renews until canceled."
+            }
+            return "\(price) \(periodLabel). Auto-renews until canceled."
+        }
+
+        fileprivate init(package: Package, eligibility: IntroEligibilityStatus) {
             self.package = package
             id = package.identifier
+            productIdentifier = package.storeProduct.productIdentifier
             price = package.storeProduct.localizedPriceString
-            hasIntroductoryOffer = package.storeProduct.introductoryDiscount != nil
 
             switch package.packageType {
             case .annual:
@@ -58,35 +71,27 @@ final class EntitlementService: ObservableObject {
                     periodLabel = "per month"
                 }
             }
+
+            if eligibility == .eligible,
+               let discount = package.storeProduct.introductoryDiscount,
+               discount.paymentMode == .freeTrial {
+                eligibleTrialLabel = Self.periodLabel(discount.subscriptionPeriod)
+            } else {
+                eligibleTrialLabel = nil
+            }
         }
 
-        fileprivate init(
-            id: String,
-            title: String,
-            price: String,
-            periodLabel: String
-        ) {
-            package = nil
-            self.id = id
-            self.title = title
-            self.price = price
-            self.periodLabel = periodLabel
-            hasIntroductoryOffer = true
+        private static func periodLabel(_ period: SubscriptionPeriod) -> String {
+            let unit: String
+            switch period.unit {
+            case .day: unit = "day"
+            case .week: unit = "week"
+            case .month: unit = "month"
+            case .year: unit = "year"
+            @unknown default: unit = "period"
+            }
+            return "\(period.value)-\(unit)"
         }
-
-        static let previewMonthly = Self(
-            id: "cafade_pro_monthly",
-            title: "MONTHLY",
-            price: "$2.99",
-            periodLabel: "per month"
-        )
-
-        static let previewYearly = Self(
-            id: "cafade_pro_yearly",
-            title: "YEARLY",
-            price: "$29.99",
-            periodLabel: "per year"
-        )
     }
 
     static let entitlementID = "pro"
@@ -102,19 +107,27 @@ final class EntitlementService: ObservableObject {
         let normalizedKey = apiKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         isConfigured = !normalizedKey.isEmpty
         state = isConfigured ? .idle : .notConfigured
+        super.init()
 
         guard isConfigured else { return }
         Purchases.configure(withAPIKey: normalizedKey)
+        Purchases.shared.delegate = self
     }
 
-    var displayOptions: [SubscriptionOption] {
-        options.isEmpty ? [.previewMonthly, .previewYearly] : options
+    func refresh() async {
+        _ = await refreshCustomerInfo()
+        await loadOfferings(refreshEntitlement: false)
     }
 
-    func loadOfferings() async {
+    func loadOfferings(refreshEntitlement: Bool = true) async {
         guard isConfigured else {
+            options = []
             state = .notConfigured
             return
+        }
+
+        if refreshEntitlement {
+            _ = await refreshCustomerInfo()
         }
 
         state = .loading
@@ -122,29 +135,45 @@ final class EntitlementService: ObservableObject {
         do {
             let offerings = try await Purchases.shared.offerings()
             guard let currentOffering = offerings.current else {
-                state = .failed("No active subscription offering is available.")
+                options = []
+                state = .failed("No active subscription offering is available. Check your connection and try again.")
                 return
             }
-            options = currentOffering.availablePackages
-                .sorted { lhs, rhs in
-                    if lhs.packageType == .annual && rhs.packageType != .annual { return true }
-                    if lhs.packageType != .annual && rhs.packageType == .annual { return false }
-                    return lhs.identifier < rhs.identifier
-                }
-                .map(SubscriptionOption.init(package:))
-            state = options.isEmpty ? .failed("No subscription plans are available.") : .ready
-            await refreshCustomerInfo()
+
+            let packages = currentOffering.availablePackages.sorted { lhs, rhs in
+                if lhs.packageType == .annual && rhs.packageType != .annual { return true }
+                if lhs.packageType != .annual && rhs.packageType == .annual { return false }
+                return lhs.identifier < rhs.identifier
+            }
+            let productIDs = packages.map(\.storeProduct.productIdentifier)
+            let eligibility = await Purchases.shared.checkTrialOrIntroDiscountEligibility(
+                productIdentifiers: productIDs
+            )
+            options = packages.map { package in
+                SubscriptionOption(
+                    package: package,
+                    eligibility: eligibility[package.storeProduct.productIdentifier]?.status ?? .unknown
+                )
+            }
+            state = options.isEmpty
+                ? .failed("No subscription plans are available. Check your connection and try again.")
+                : .ready
         } catch is CancellationError {
             return
         } catch {
-            state = .failed(error.localizedDescription)
+            options = []
+            state = .failed("Subscription plans could not be loaded. Check your connection and try again.")
         }
     }
 
     func purchase(option: SubscriptionOption) async {
-        guard isConfigured, let package = option.package else {
+        guard isConfigured else {
             state = .notConfigured
-            lastMessage = "Subscription products will be available after RevenueCat is connected."
+            lastMessage = "Subscriptions are not configured in this build."
+            return
+        }
+        guard let package = option.package else {
+            state = .failed("This subscription plan is not available. Try loading the plans again.")
             return
         }
 
@@ -155,10 +184,9 @@ final class EntitlementService: ObservableObject {
             apply(customerInfo: result.customerInfo)
             if result.userCancelled {
                 state = .ready
-                lastMessage = "Purchase canceled."
             } else {
                 state = .purchased
-                lastMessage = isPro ? "Cafade Pro is active." : "Purchase completed."
+                lastMessage = isPro ? "Cafade Pro is active." : "The purchase finished, but Pro is not active yet. Try Restore Purchases."
             }
         } catch is CancellationError {
             state = .ready
@@ -171,7 +199,7 @@ final class EntitlementService: ObservableObject {
     func restorePurchases() async {
         guard isConfigured else {
             state = .notConfigured
-            lastMessage = "Purchase restoration will be available after RevenueCat is connected."
+            lastMessage = "Subscriptions are not configured in this build."
             return
         }
 
@@ -188,7 +216,7 @@ final class EntitlementService: ObservableObject {
                 lastMessage = "No previous Cafade Pro purchase was found."
             }
         } catch is CancellationError {
-            state = .ready
+            state = options.isEmpty ? .idle : .ready
         } catch {
             state = .failed(error.localizedDescription)
             lastMessage = error.localizedDescription
@@ -211,5 +239,13 @@ final class EntitlementService: ObservableObject {
 
     private func apply(customerInfo: CustomerInfo) {
         isPro = customerInfo.entitlements.all[Self.entitlementID]?.isActive == true
+    }
+}
+
+extension EntitlementService: PurchasesDelegate {
+    nonisolated func purchases(_ purchases: Purchases, receivedUpdated customerInfo: CustomerInfo) {
+        Task { @MainActor [weak self] in
+            self?.apply(customerInfo: customerInfo)
+        }
     }
 }

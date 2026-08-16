@@ -1,4 +1,4 @@
-// Keep this file safe to commit. Put a real public SDK key in
-// RevenueCat.local.xcconfig on the local machine or CI.
-REVENUECAT_API_KEY =
+// RevenueCat public SDK keys are intended to ship in the app bundle. Keeping
+// the Cafade key here makes clean Xcode Cloud checkouts self-contained.
+REVENUECAT_API_KEY = appl_bIDLWWHeKqIGHfVCSKIfMZejAns
 #include? "RevenueCat.local.xcconfig"
