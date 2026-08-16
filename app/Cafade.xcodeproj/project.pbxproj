@@ -87,6 +87,7 @@
 		13440F013B20C092F6E75C1F /* CafadeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeTheme.swift; sourceTree = "<group>"; };
 		1B657E03BFB59A4D7B755698 /* CafadeWidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeWidgetStore.swift; sourceTree = "<group>"; };
 		1BD91EDD9757C1BD5FFDDEF4 /* CaffeineCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CaffeineCatalog.json; sourceTree = "<group>"; };
+		24643349A874493736921887 /* purchases-ios-spm-vendored */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "purchases-ios-spm-vendored"; path = "ThirdParty/purchases-ios-spm-vendored"; sourceTree = SOURCE_ROOT; };
 		2ED3F3798B2DF5E9FFEBF8E0 /* CafadeWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CafadeWidget.entitlements; sourceTree = "<group>"; };
 		34B992EEB58C05AAEA48C882 /* CafadeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafadeWidget.swift; sourceTree = "<group>"; };
 		358BCC12ABBA99C75E1ECF55 /* CustomDrinkEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDrinkEditorView.swift; sourceTree = "<group>"; };
@@ -167,6 +168,7 @@
 				C34D750FD404B8F6B75E5346 /* CafadeUITests */,
 				B79AEF2F274BB4F0AA0DC809 /* CafadeWidget */,
 				0F42F3A462D49927F003EF36 /* Config */,
+				40F1E4AE3B21212677C5F978 /* Packages */,
 				77495C38B045CAF8776E4210 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -178,6 +180,14 @@
 				4DE253113CBA466B2D9D909B /* LogCaffeineFromWidgetIntent.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		40F1E4AE3B21212677C5F978 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				24643349A874493736921887 /* purchases-ios-spm-vendored */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		5A591AD0F4EBE0BE36717516 /* Cafade */ = {
@@ -481,7 +491,7 @@
 			mainGroup = 141F76EB232C058138C61503;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				0A00F5E784A4CBBB8E4B4AE3 /* XCLocalSwiftPackageReference "ThirdParty/purchases-ios-spm-vendored" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 77495C38B045CAF8776E4210 /* Products */;
@@ -930,21 +940,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.43.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		0A00F5E784A4CBBB8E4B4AE3 /* XCLocalSwiftPackageReference "ThirdParty/purchases-ios-spm-vendored" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "ThirdParty/purchases-ios-spm-vendored";
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		70517F50BB64ADAF9BAF7562 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1C4E50BEAE943B8F9CB3F3F8 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */

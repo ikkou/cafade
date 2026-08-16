@@ -9,8 +9,7 @@ options:
 
 packages:
   RevenueCat:
-    url: https://github.com/RevenueCat/purchases-ios-spm.git
-    from: 5.43.0
+    path: ThirdParty/purchases-ios-spm-vendored
 
 settings:
   base:
