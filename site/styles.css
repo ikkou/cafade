@@ -147,6 +147,21 @@ a {
   margin-top: 34px;
 }
 
+.app-store-badge {
+  display: inline-block;
+  line-height: 0;
+}
+
+.app-store-badge img {
+  display: block;
+  height: 60px;
+  width: auto;
+}
+
+.app-store-badge:focus-visible {
+  border-radius: 8px;
+}
+
 .button {
   align-items: center;
   background: var(--ink);
